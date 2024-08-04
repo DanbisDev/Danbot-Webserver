@@ -3,7 +3,28 @@
 {% block content %}
     <title>Maxing</title>
     <div>
-        <h1>So you decided to max your account</h1>
+        <table>
+            <tr>
+                <th>Skill Name</th>
+                <th>Level</th>
+                <th>XP</th>
+                <th>XP Left</th>
+                <th>Expected XP Rate</th>
+                <th>EHP Rate</th>
+                <th>XP Gained in the Last Day</th>
+                <th>XP Gained in the Last Month</th>
+            </tr>
+            <!-- build rows for each skill -->
+            {% for x in range(skillsInfo.len()) %}
+            <tr>
+                <!-- change values for each field of the table -->
+                {% for x in range(8) %}
+                <!-- set skill name, level, xp, xp left, expected xp rate, ehp rate, xp / day, xp / month -->
+                <td></td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
     </div>
 {% endblock %}
 

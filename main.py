@@ -33,6 +33,7 @@ def start_bot():
 
 
 def create_app():
+    app.config["SESSION_FILE_DIR"] = "/var/www/webApp/webApp/DANBOT"
     return app
 
 
