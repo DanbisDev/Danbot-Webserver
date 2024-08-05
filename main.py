@@ -34,6 +34,7 @@ def start_bot():
 
 def create_app():
     app.config["SESSION_FILE_DIR"] = "/var/www/webApp/webApp/DANBOT"
+    app.config["JSON_SORT_KEYS"] = False
     return app
 
 

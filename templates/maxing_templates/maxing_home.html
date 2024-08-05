@@ -15,13 +15,20 @@
                 <th>XP Gained in the Last Month</th>
             </tr>
             <!-- build rows for each skill -->
-            {% for x in range(skillsInfo.len()) %}
+            {% for skill, xp in currentXP.items() %}
             <tr>
                 <!-- change values for each field of the table -->
-                {% for x in range(8) %}
+
+
                 <!-- set skill name, level, xp, xp left, expected xp rate, ehp rate, xp / day, xp / month -->
-                <td></td>
-                {% endfor %}
+                <td>{{skill}}</td>
+                <td>{{currentLevel[skill]}}</td>
+                <td>{{xp}}</td>
+                <td>{{xpLeft[skill]}}</td>
+                <td><input value = "Expected XP Value"></td>
+                <td>EHP for {{skill}}</td>
+                <td>{{gainedDay[skill]}}</td>
+                <td>{{gainedMonth[skill]}}</td>
             </tr>
             {% endfor %}
         </table>
