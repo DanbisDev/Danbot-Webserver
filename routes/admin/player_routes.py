@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, request, redirect, url_for, flash, Blueprint
 
 from routes.admin.admin_routes import admin_required
@@ -18,7 +20,7 @@ def player_list():
     return render_template('admin_templates/player_templates/player_list.html', players_by_team=players_by_team)
 
 
-API_KEY = "o901h0ovbwg1t8q3w9jbybee"
+API_KEY = os.getenv('WOM_KEY')
 DISCORD_NAME = "danny0897"
 
 @player_routes.route('/add_list/<int:team_id>', methods=['GET', 'POST'])
