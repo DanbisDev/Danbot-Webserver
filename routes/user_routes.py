@@ -223,15 +223,14 @@ def leaderboard():
         player.gp_gained = scapify.int_to_gp(player.gp_gained)
         player.tiles_completed = round(player.tiles_completed, 2)
 
-    for team in teams_gp_earned:
-        teams_gp_earned[team] = scapify.int_to_gp(teams_gp_earned[team])
-
-
     teams = []
     for team in database.get_teams():
         teams.append(db_entities.Team(team))
 
     teams = sorted(teams, key=lambda team: (team.team_points, teams_gp_earned[team.team_id]), reverse=True)
+
+    for team in teams_gp_earned:
+        teams_gp_earned[team] = scapify.int_to_gp(teams_gp_earned[team])
 
     team_partial_tiles = defaultdict(int)
     player_partials = defaultdict(int)
