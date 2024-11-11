@@ -6,7 +6,6 @@ from flask_bcrypt import Bcrypt
 from flask_login import UserMixin, logout_user
 import utils.db_entities as db_entities
 from routes import dink
-from routes.admin.player_routes import API_KEY, DISCORD_NAME
 from utils.db_entities import Player, Tile
 from utils.spoofed_jsons import spoof_drop
 
@@ -901,8 +900,8 @@ def add_wrapup_player(username):
             return False
         else:
             headers = {
-                'x-api-key': API_KEY,
-                'User-Agent': DISCORD_NAME
+                'x-api-key': os.getenv('WOM_KEY'),
+                'User-Agent': "danny0897"
             }
             response = requests.get(f'https://api.wiseoldman.net/v2/players/{username.strip().replace("-", "%20")}/names',
                                     headers)
