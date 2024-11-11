@@ -897,14 +897,13 @@ def add_wrapup_player(username):
 
         # Check if player exists
         if cursor.fetchone():
-            return False
+            return False  # Username already exists
         else:
             headers = {
                 'x-api-key': os.getenv('WOM_KEY'),
                 'User-Agent': "danny0897"
             }
-            response = requests.get(f'https://api.wiseoldman.net/v2/players/{username.strip().replace("-", "%20")}/names',
-                                    headers)
+            response = requests.get(f'https://api.wiseoldman.net/v2/players/{username.strip().replace("-", "%20")}/names', headers=headers)
 
             # Check if the response status is OK and convert to JSON
             if response.status_code == 200:
@@ -917,15 +916,22 @@ def add_wrapup_player(username):
 
                     # Proceed if "oldName" exists
                     if old_name:
-                        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (old_name))
+                        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (old_name,))
                         if cursor.fetchone():
-                            cursor.execute("UPDATE wrapup_players SET username = %s where username = %s"(username,
-                                                                                                         old_name, ))
+                            cursor.execute("UPDATE wrapup_players SET username = %s WHERE username = %s", (username, old_name))
+                            conn.commit()
                             return True
                         else:
                             cursor.execute(
-                                "INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0,))
+                                """
+                                INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, 
+                                personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained) 
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                """,
+                                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0)
+                            )
+                            conn.commit()
+                            return True
                     else:
                         print("Error: 'oldName' not found in the response data.")
                 else:
@@ -933,8 +939,7 @@ def add_wrapup_player(username):
             else:
                 print(f"Error fetching data: {response.status_code}")
 
-
-            return False
+            return False  # Return False if user not added
 
 def database_startup():
     print("connecting to db")

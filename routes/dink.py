@@ -284,7 +284,6 @@ def parse_clue(data):
 def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     rsn = data['playerName']
     boss_name = data['extra']['boss']
-    print(f"KILLCOUNT: {rsn} - {boss_name}")
 
     add_wrapup_player(rsn)
 
@@ -462,7 +461,6 @@ def parse_barbarian_assault_gamble(data) -> dict[str, list[str]]:
 def parse_player_kill(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     victim = data['extra']['victimName']
-    print(f"PLAYER_KILL - {rsn} killed {victim}")
     # print data prettyfied
     # print(json.dumps(data, indent = 2))
     return True
@@ -510,7 +508,6 @@ def parse_trade(data) -> dict[str, list[str]]:
 def parse_chat(data, img_file):
     rsn = data['playerName']
     chat_text = data['extra']['message']
-    print(f"CHAT: {rsn} - \"{chat_text}\"")
 
     add_wrapup_player(rsn)
 
@@ -583,7 +580,6 @@ def parse_leagues_task(data) -> dict[str, list[str]]:
 # function to parse login data
 def parse_login(data) -> dict[str, list[str]]:
     rsn = data['playerName']
-    print(f"LOGIN - {rsn}")
 
     add_wrapup_player(rsn)
 
