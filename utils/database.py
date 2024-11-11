@@ -909,10 +909,11 @@ def add_wrapup_player(username):
             if cursor.fetchone():
                 # Player renamed TODO : Update player name instead of insert
                 print('renamed')
+                cursor.execute("UPDATE wrapup_players SET username = %s where username = %s" (username, response[0]["oldName"],))
                 return True
             else :
-                cursor.execute("INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained, clan_year) VALUES (%s)",
-                               (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, int(os.getenv('CLAN_YEAR'))))
+                cursor.execute("INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                               (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0,))
             return True
 
 def database_startup():
@@ -933,7 +934,6 @@ def database_startup():
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS wrapup_clan_totals (
-            clan_year integer PRIMARY KEY,
             gold_gains BIGINT,
             pet_gains integer,
             pbs_set integer,
@@ -947,15 +947,15 @@ def database_startup():
         )
     ''')
 
-    cursor.execute('''
-        INSERT INTO wrapup_clan_totals (
-            clan_year, gold_gains, pet_gains, pbs_set, collection_logs, clan_deaths, 
-            gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained
-        ) VALUES (%s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-        ON CONFLICT (clan_year) DO NOTHING
-    ''', (int(os.getenv("CLAN_YEAR")),))
+    cursor.execute('SELECT * FROM wrapup_clan_totals')
+    if not cursor.fetchone():
+        cursor.execute('''
+            INSERT INTO wrapup_clan_totals (
+                gold_gains, pet_gains, pbs_set, collection_logs, clan_deaths, 
+                gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained
+            ) VALUES (0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        ''')
 
-    conn.commit()
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS wrapup_players (
@@ -965,13 +965,12 @@ def database_startup():
             pets_gained integer,
             personal_collection_logs integer,
             personal_pbs integer,
-            username text,
+            username text UNIQUE,
             gold_split integer,
             levels_gained integer,
             slayer_tasks integer,
             clues_completed integer,
-            max_levels_gained integer,
-            clan_year INTEGER REFERENCES wrapup_clan_totals(clan_year) ON DELETE CASCADE ON UPDATE CASCADE
+            max_levels_gained integer
         )
     ''')
 
@@ -982,7 +981,6 @@ def database_startup():
             content_id SERIAL PRIMARY KEY,
             boss_name text,
             best_time text,
-            clan_year INTEGER REFERENCES wrapup_clan_totals(clan_year) ON DELETE CASCADE ON UPDATE CASCADE,
             username TEXT REFERENCES wrapup_players(username) ON DELETE CASCADE ON UPDATE CASCADE
         )
     ''')
@@ -992,7 +990,6 @@ def database_startup():
             item_name text PRIMARY KEY,
             item_value integer,
             item_quantity integer,
-            clan_year INTEGER REFERENCES wrapup_clan_totals(clan_year) ON DELETE CASCADE ON UPDATE CASCADE,
             username TEXT REFERENCES wrapup_players(username) ON DELETE CASCADE ON UPDATE CASCADE
         )
     ''')
