@@ -905,15 +905,38 @@ def add_wrapup_player(username):
             }
             response = requests.get(f'https://api.wiseoldman.net/v2/players/{username.strip().replace("-", "%20")}/names',
                                     headers).json()
-            cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (response[0]["oldName"],))
-            if cursor.fetchone():
-                # Player renamed TODO : Update player name instead of insert
-                print('renamed')
-                cursor.execute("UPDATE wrapup_players SET username = %s where username = %s" (username, response[0]["oldName"],))
-                return True
-            else :
-                cursor.execute("INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                               (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0,))
+
+            # Check if the response status is OK and convert to JSON
+            if response.status_code == 200:
+                response_data = response.json()
+
+                # Ensure that response_data is a non-empty list
+                if isinstance(response_data, list) and response_data:
+                    # Access the first item's "oldName" field
+                    old_name = response_data[0].get("oldName", None)
+
+                    # Proceed if "oldName" exists
+                    if old_name:
+                        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (response[0]["oldName"],))
+                        if cursor.fetchone():
+                            # Player renamed TODO : Update player name instead of insert
+                            print('renamed')
+                            cursor.execute("UPDATE wrapup_players SET username = %s where username = %s"(username,
+                                                                                                         response[0][
+                                                                                                             "oldName"], ))
+                            return True
+                        else:
+                            cursor.execute(
+                                "INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0,))
+                    else:
+                        print("Error: 'oldName' not found in the response data.")
+                else:
+                    print("Error: Response data is empty or not a list.")
+            else:
+                print(f"Error fetching data: {response.status_code}")
+
+
             return True
 
 def database_startup():
