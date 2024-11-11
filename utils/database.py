@@ -900,7 +900,7 @@ def add_wrapup_player(username):
             return False  # Username already exists
         else:
             headers = {
-                'x-api-key': os.getenv('WOM_KEY'),
+                # 'x-api-key': os.getenv('WOM_KEY'),
                 'User-Agent': "danny0897"
             }
             response = requests.get(f'https://api.wiseoldman.net/v2/players/{username.strip().replace("-", "%20")}/names', headers=headers)
