@@ -913,7 +913,7 @@ def add_wrapup_player(username):
                 return True
             else :
                 cursor.execute("INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained, clan_year) VALUES (%s)",
-                               (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, os.getenv('CLAN_YEAR')))
+                               (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, int(os.getenv('CLAN_YEAR'))))
             return True
 
 def database_startup():
@@ -947,6 +947,14 @@ def database_startup():
             max_levels_gained integer
         )
     ''')
+
+    cursor.execute('''
+        INSERT INTO wrapup_clan_totals (
+            clan_year, gold_gains, pet_gains, pbs_set, collection_logs, clan_deaths, 
+            gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained
+        ) VALUES (%s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        ON CONFLICT (clan_year) DO NOTHING
+    ''', (int(os.getenv("CLAN_YEAR")),))
 
     conn.commit()
 
