@@ -1,10 +1,12 @@
 import os
 import csv
 import psycopg2
+import requests
 from flask_bcrypt import Bcrypt
 from flask_login import UserMixin, logout_user
 import utils.db_entities as db_entities
 from routes import dink
+from routes.admin.player_routes import API_KEY, DISCORD_NAME
 from utils.db_entities import Player, Tile
 from utils.spoofed_jsons import spoof_drop
 
@@ -898,9 +900,20 @@ def add_wrapup_player(username):
         if cursor.fetchone():
             return False
         else:
-            # TODO : Check for namechange with https://api.wiseoldman.net/v2/players/Danbis/names
-
-            cursor.execute("INSERT INTO wrapup_players (username) VALUES (%s)", (username,))
+            headers = {
+                'x-api-key': API_KEY,
+                'User-Agent': DISCORD_NAME
+            }
+            response = requests.get(f'https://api.wiseoldman.net/v2/players/{username.strip().replace("-", "%20")}/names',
+                                    headers)
+            cursor.execute("SELECT 1 FROM wrapup_players WHERE username =%S", (response[0]["oldName"],))
+            if cursor.fetchone():
+                # Player renamed TODO : Update player name instead of insert
+                print('renamed')
+                return True
+            else :
+                cursor.execute("INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained, clan_year) VALUES (%s)",
+                               (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, os.getenv('CLAN_YEAR')))
             return True
 
 def database_startup():
@@ -940,11 +953,12 @@ def database_startup():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS wrapup_players (
             player_id SERIAL PRIMARY KEY,
+            player_deaths integer,
             gold_gained BIGINT,
             pets_gained integer,
             personal_collection_logs integer,
             personal_pbs integer,
-            username text UNIQUE,
+            username text,
             gold_split integer,
             levels_gained integer,
             slayer_tasks integer,
