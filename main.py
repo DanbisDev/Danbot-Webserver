@@ -16,7 +16,8 @@ import os
 import threading
 import bot
 
-from utils.database import add_user, get_user_by_email, check_password, get_user_by_id  # Import your database functions
+from utils.database import add_user, get_user_by_email, check_password, get_user_by_id, \
+    database_startup  # Import your database functions
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'development secret')
@@ -108,7 +109,10 @@ if __name__ == "__main__":
     bot_thread.start()
     print("Bot started!")
 
+    database_startup()
+
     print("Starting server...")
     port = os.environ.get('PORT', 80)
     print("Server started!")
     serve(app, host="0.0.0.0", port=port)
+

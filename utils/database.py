@@ -890,20 +890,108 @@ def change_player_team(player_id, new_team_id):
         conn.commit()
 
 
-def reset_tables():
+def database_startup():
+    print("connecting to db")
+    conn = connect()
+    print("connected")
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            user_id SERIAL PRIMARY KEY,
+            username text,
+            email text,
+            password text,
+            is_admin boolean
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS wrapup_clan_totals (
+            clan_year integer PRIMARY KEY,
+            gold_gains BIGINT,
+            pet_gains integer,
+            pbs_set integer,
+            collection_logs integer,
+            clan_deaths integer,
+            gold_split integer,
+            levels_gained integer,
+            slayer_tasks integer,
+            clues_completed integer,
+            max_levels_gained integer
+        )
+    ''')
+
+    conn.commit()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS wrapup_players (
+            player_id SERIAL PRIMARY KEY,
+            gold_gained BIGINT,
+            pets_gained integer,
+            personal_collection_logs integer,
+            personal_pbs integer,
+            username text UNIQUE,
+            gold_split integer,
+            levels_gained integer,
+            slayer_tasks integer,
+            clues_completed integer,
+            max_levels_gained integer,
+            clan_year INTEGER REFERENCES wrapup_clan_totals(clan_year) ON DELETE CASCADE ON UPDATE CASCADE
+        )
+    ''')
+
+    conn.commit()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS wrapup_personal_bests (
+            content_id SERIAL PRIMARY KEY,
+            boss_name text,
+            best_time text,
+            clan_year INTEGER REFERENCES wrapup_clan_totals(clan_year) ON DELETE CASCADE ON UPDATE CASCADE,
+            username TEXT REFERENCES wrapup_players(username) ON DELETE CASCADE ON UPDATE CASCADE
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS wrapup_clogging_uwu (
+            item_name text PRIMARY KEY,
+            item_value integer,
+            item_quantity integer,
+            clan_year INTEGER REFERENCES wrapup_clan_totals(clan_year) ON DELETE CASCADE ON UPDATE CASCADE,
+            username TEXT REFERENCES wrapup_players(username) ON DELETE CASCADE ON UPDATE CASCADE
+        )
+    ''')
+
+    # Save (commit) the changes
+    conn.commit()
+    print("Finished creating!")
+
+    # Close the connection
+    conn.close()
+
+
+def reset_bingo_tables():
     # Drop all tables
     print("connecting to db")
     conn = connect()
     print("connected")
     cursor = conn.cursor()
-    # Get the list of all tables
-    cursor.execute(
-        "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")
-    tables = cursor.fetchall()
 
     # Drop each table
-    for table in tables:
-        cursor.execute(f"DROP TABLE IF EXISTS {table[0]} CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS chats CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS completed_tiles CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS drop_whitelist CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS drops CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS killcount CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS manual_tile_progress CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS partial_completion CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS players CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS relevant_drops CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS requests CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS teams CASCADE;")
+    cursor.execute(f"DROP TABLE IF EXISTS tiles CASCADE;")
+
 
     print("All tables dropped successfully.")
     print("Recreating now...")
@@ -928,7 +1016,7 @@ def reset_tables():
                 tiles_completed real,
                 team_id integer,
                 pet_count integer,
-                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE
+                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
             ''')
 
@@ -942,8 +1030,8 @@ def reset_tables():
                 drop_quantity integer,
                 drop_source text,
                 drops_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE,
-                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
         ''')
 
@@ -954,8 +1042,8 @@ def reset_tables():
                 boss_name text,
                 kills integer,
                 killcount_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE,
-                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
             )''')
 
     cursor.execute('''
@@ -977,7 +1065,7 @@ def reset_tables():
             CREATE TABLE drop_whitelist (
                 drop_name text PRIMARY KEY,
                 tile_id int,
-                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE
+                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE
             )''')
 
     cursor.execute('''
@@ -985,8 +1073,8 @@ def reset_tables():
                 team_id integer,
                 tile_id integer,
                 completed_tile_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE,
-                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE
+                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
             ''')
 
@@ -996,10 +1084,10 @@ def reset_tables():
                 team_id integer,
                 tile_id integer,
                 progress real,
-                manual_tile_progress_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE,
-                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE,
-                FOREIGN KEY (player_id) REFERENCES players(player_id) ON DELETE CASCADE
+                manual_tile_progress_pk SERIAL PRIMARY KEY ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY (player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
             ''')
 
@@ -1021,9 +1109,9 @@ def reset_tables():
                 tile_id integer,
                 chat text,
                 chats_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE,
-                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE,
-                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE                
+                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE                
             )
             ''')
 
@@ -1034,9 +1122,9 @@ def reset_tables():
                 player_id integer,
                 partial_completion real,
                 partial_completion_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE,
-                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE,
-                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE
+                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
             ''')
 
@@ -1050,12 +1138,14 @@ def reset_tables():
                 player_name text,
                 drops_pk SERIAL,
                 relevant_drops_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY(drops_pk) REFERENCES  drops(drops_pk) ON DELETE CASCADE,
-                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE,
-                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE,
-                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE
+                FOREIGN KEY(drops_pk) REFERENCES  drops(drops_pk) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
             ''')
+
+
 
     # Save (commit) the changes
     conn.commit()
