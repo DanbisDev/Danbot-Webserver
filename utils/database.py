@@ -905,7 +905,7 @@ def add_wrapup_player(username):
             }
             response = requests.get(f'https://api.wiseoldman.net/v2/players/{username.strip().replace("-", "%20")}/names',
                                     headers).json()
-            cursor.execute("SELECT 1 FROM wrapup_players WHERE username =%S", (response[0]["oldName"],))
+            cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (response[0]["oldName"],))
             if cursor.fetchone():
                 # Player renamed TODO : Update player name instead of insert
                 print('renamed')
