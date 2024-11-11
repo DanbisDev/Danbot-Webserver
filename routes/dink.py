@@ -15,8 +15,9 @@ drop_submission_route = Blueprint("dink", __name__)
 # function to parse death data
 def parse_death(data) -> dict[str, list[str]]:
     rsn = data['playerName']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -35,8 +36,9 @@ def parse_death(data) -> dict[str, list[str]]:
 def parse_collection(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     itemName = data['extra']['itemName']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -48,8 +50,9 @@ def parse_collection(data) -> dict[str, list[str]]:
 # function to parse level data
 def parse_level(data) -> dict[str, list[str]]:
     rsn = data['playerName']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -63,9 +66,9 @@ def parse_loot(data, img_file) -> dict[str, list[str]]:
 
     # Get rsn
     rsn = data['playerName']
+    dinkHash = data['dinkAccountHash']
 
-
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -239,8 +242,9 @@ def parse_slayer(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     slayer_monster = data['extra']['monster']
     kc_required = data['extra']['killCount']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -255,8 +259,9 @@ def parse_slayer(data) -> dict[str, list[str]]:
 def parse_quest(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     questName = data['extra']['questName']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -270,8 +275,9 @@ def parse_quest(data) -> dict[str, list[str]]:
 def parse_clue(data):
     rsn = data['playerName']
     clueType = data['extra']['clueType']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -284,8 +290,9 @@ def parse_clue(data):
 def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     rsn = data['playerName']
     boss_name = data['extra']['boss']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -378,8 +385,9 @@ def parse_combat_achievement(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     achievement = data['extra']['task']
     tier = data['extra']['tier']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -395,8 +403,9 @@ def parse_pet(data, img_file) -> dict[str, list[str]]:
     rsn = data['playerName']
     pet = data['extra']['petName']
     print(f"PET: {rsn} - {pet}")
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -486,8 +495,9 @@ def parse_grand_exchange(data) -> dict[str, list[str]]:
 def parse_trade(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     other_rsn = data['extra']['counterparty']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -508,8 +518,9 @@ def parse_trade(data) -> dict[str, list[str]]:
 def parse_chat(data, img_file):
     rsn = data['playerName']
     chat_text = data['extra']['message']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -580,8 +591,9 @@ def parse_leagues_task(data) -> dict[str, list[str]]:
 # function to parse login data
 def parse_login(data) -> dict[str, list[str]]:
     rsn = data['playerName']
+    dinkHash = data['dinkAccountHash']
 
-    add_wrapup_player(rsn)
+    add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})

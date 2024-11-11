@@ -890,7 +890,7 @@ def change_player_team(player_id, new_team_id):
         cursor.execute("UPDATE manual_tile_progress SET team_id = %s WHERE player_id = %s", (new_team_id, player_id,))
         conn.commit()
 
-def add_wrapup_player(username):
+def add_wrapup_player(username, account_hash):
     with connect() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (username, ))
@@ -899,47 +899,18 @@ def add_wrapup_player(username):
         if cursor.fetchone():
             return False  # Username already exists
         else:
-            headers = {
-                # 'x-api-key': os.getenv('WOM_KEY'),
-                'User-Agent': "danny0897"
-            }
-            response = requests.get(f'https://api.wiseoldman.net/v2/players/{username.strip().replace("-", "%20")}/names', headers=headers)
 
-            # Check if the response status is OK and convert to JSON
-            if response.status_code == 200:
-                response_data = response.json()
+            cursor.execute(
+                """
+                INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, 
+                personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained, dink_account_hash) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, account_hash, )
+            )
+            conn.commit()
 
-                # Ensure that response_data is a non-empty list
-                if isinstance(response_data, list) and response_data:
-                    # Access the first item's "oldName" field
-                    old_name = response_data[0].get("oldName", None)
-
-                    # Proceed if "oldName" exists
-                    if old_name:
-                        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (old_name,))
-                        if cursor.fetchone():
-                            cursor.execute("UPDATE wrapup_players SET username = %s WHERE username = %s", (username, old_name))
-                            conn.commit()
-                            return True
-                        else:
-                            cursor.execute(
-                                """
-                                INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, 
-                                personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained) 
-                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                                """,
-                                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0)
-                            )
-                            conn.commit()
-                            return True
-                    else:
-                        print("Error: 'oldName' not found in the response data.")
-                else:
-                    print("Error: Response data is empty or not a list.")
-            else:
-                print(f"Error fetching data: {response.status_code}")
-
-            return False  # Return False if user not added
+            return True
 
 def database_startup():
     print("connecting to db")
@@ -995,7 +966,8 @@ def database_startup():
             levels_gained integer,
             slayer_tasks integer,
             clues_completed integer,
-            max_levels_gained integer
+            max_levels_gained integer,
+            dink_account_hash text
         )
     ''')
 
