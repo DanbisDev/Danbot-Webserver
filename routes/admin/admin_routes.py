@@ -106,7 +106,7 @@ def reset_database():
         flash("You do not have permission to access this page.", "danger")
         return redirect(url_for('home'))
     if request.method == 'POST':
-        database.reset_tables()
+        database.reset_bingo_tables()
         flash("Database reset successfully.")
     return render_template('admin_templates/reset_database.html')
 
