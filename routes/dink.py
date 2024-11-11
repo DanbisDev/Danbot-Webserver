@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request
 import json
 
 from utils import database, db_entities
-from utils.database import add_wrapup_player, add_wrapup_player_gold
+from utils.database import add_wrapup_player, add_wrapup_player_gold, add_wrapup_player_deaths
 from utils.db_entities import Player, Team, Tile, Drop
 from utils.send_webhook import send_webhook
 
@@ -18,6 +18,8 @@ def parse_death(data) -> dict[str, list[str]]:
     dinkHash = data['dinkAccountHash']
 
     add_wrapup_player(rsn, dinkHash)
+
+    add_wrapup_player_deaths(rsn)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
