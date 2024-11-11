@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request
 import json
 
 from utils import database, db_entities
-from utils.database import add_wrapup_player
+from utils.database import add_wrapup_player, add_wrapup_player_gold
 from utils.db_entities import Player, Team, Tile, Drop
 from utils.send_webhook import send_webhook
 
@@ -70,8 +70,7 @@ def parse_loot(data, img_file) -> dict[str, list[str]]:
 
     add_wrapup_player(rsn, dinkHash)
 
-    if os.getenv('TRACKING') == "FALSE":
-        return jsonify({"message": "Not currently tracking"})
+
 
     # Handle discord attachment
     player = database.get_player_by_name(rsn)
@@ -100,6 +99,11 @@ def parse_loot(data, img_file) -> dict[str, list[str]]:
         itemQuantity = item['quantity']
         # Get item total
         item_each = item['priceEach']
+
+        add_wrapup_player_gold(rsn, itemPrice * itemQuantity)
+
+        if os.getenv('TRACKING') == "FALSE":
+            continue
 
         # Add the item to the database
         print(f"LOOT: {player.player_name} - {itemName} x {itemQuantity} ({itemQuantity * itemPrice})")

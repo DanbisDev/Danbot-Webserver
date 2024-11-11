@@ -890,14 +890,50 @@ def change_player_team(player_id, new_team_id):
         cursor.execute("UPDATE manual_tile_progress SET team_id = %s WHERE player_id = %s", (new_team_id, player_id,))
         conn.commit()
 
+def add_wrapup_player_deaths(username):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the player's gold_gained by adding the given gold
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET player_deaths = player_deaths + %1
+            WHERE username = %s
+        """, (username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET clan_deaths = clan_deaths + 1
+        """)
+
+        # Commit the transaction to save changes
+        conn.commit()
+
+def add_wrapup_player_gold(username, gold):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the player's gold_gained by adding the given gold
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET gold_gained = gold_gained + %s
+            WHERE username = %s
+        """, (gold, username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET gold_gains = gold_gains + %s
+        """, (gold, ))
+
+        # Commit the transaction to save changes
+        conn.commit()
+
 def add_wrapup_player(username, account_hash):
     with connect() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (username,))
+        cursor.execute("SELECT 1 FROM wrapup_players WHERE dink_account_hash = %s", (account_hash,))
 
         # Check if player exists
         if cursor.fetchone():
-            return False  # Username already exists
+            cursor.execute("UPDATE wrapup_players SET username = %s where dink_account_hash = %s", (username, account_hash,))
         else:
             cursor.execute(
                 """
