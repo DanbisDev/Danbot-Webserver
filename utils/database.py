@@ -893,23 +893,21 @@ def change_player_team(player_id, new_team_id):
 def add_wrapup_player(username, account_hash):
     with connect() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (username, ))
+        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (username,))
 
         # Check if player exists
         if cursor.fetchone():
             return False  # Username already exists
         else:
-
             cursor.execute(
                 """
                 INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, 
                 personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained, dink_account_hash) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, account_hash, )
+                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, account_hash)
             )
             conn.commit()
-
             return True
 
 def database_startup():
