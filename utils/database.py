@@ -917,13 +917,12 @@ def add_wrapup_player(username):
 
                     # Proceed if "oldName" exists
                     if old_name:
-                        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (response[0]["oldName"],))
+                        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (old_name))
                         if cursor.fetchone():
                             # Player renamed TODO : Update player name instead of insert
                             print('renamed')
                             cursor.execute("UPDATE wrapup_players SET username = %s where username = %s"(username,
-                                                                                                         response[0][
-                                                                                                             "oldName"], ))
+                                                                                                         old_name, ))
                             return True
                         else:
                             cursor.execute(
@@ -937,7 +936,7 @@ def add_wrapup_player(username):
                 print(f"Error fetching data: {response.status_code}")
 
 
-            return True
+            return False
 
 def database_startup():
     print("connecting to db")
