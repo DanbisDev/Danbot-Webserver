@@ -889,6 +889,19 @@ def change_player_team(player_id, new_team_id):
         cursor.execute("UPDATE manual_tile_progress SET team_id = %s WHERE player_id = %s", (new_team_id, player_id,))
         conn.commit()
 
+def add_wrapup_player(username):
+    with connect() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1 FROM wrapup_players WHERE username = %s", (username, ))
+
+        # Check if player exists
+        if cursor.fetchone():
+            return False
+        else:
+            # TODO : Check for namechange with https://api.wiseoldman.net/v2/players/Danbis/names
+
+            cursor.execute("INSERT INTO wrapup_players (username) VALUES (%s)", (username,))
+            return True
 
 def database_startup():
     print("connecting to db")

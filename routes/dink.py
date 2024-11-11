@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, request
 import json
 
 from utils import database, db_entities
+from utils.database import add_wrapup_player
 from utils.db_entities import Player, Team, Tile, Drop
 from utils.send_webhook import send_webhook
 
@@ -14,6 +15,11 @@ drop_submission_route = Blueprint("dink", __name__)
 # function to parse death data
 def parse_death(data) -> dict[str, list[str]]:
     rsn = data['playerName']
+
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
     # Check if killerName exists
     if 'killerName' not in data['extra']:
         print("DEATH: " + rsn)
@@ -29,6 +35,12 @@ def parse_death(data) -> dict[str, list[str]]:
 def parse_collection(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     itemName = data['extra']['itemName']
+
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
+
     print(f"COLLECTION - {rsn} got a new collection log {itemName}")
     return True
 
@@ -36,6 +48,12 @@ def parse_collection(data) -> dict[str, list[str]]:
 # function to parse level data
 def parse_level(data) -> dict[str, list[str]]:
     rsn = data['playerName']
+
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
+
     levelledSkills = data['extra']['levelledSkills']
     print(f"LEVEL - {rsn} levelled up {levelledSkills}")
     return True
@@ -45,6 +63,12 @@ def parse_loot(data, img_file) -> dict[str, list[str]]:
 
     # Get rsn
     rsn = data['playerName']
+
+
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
 
     # Handle discord attachment
     player = database.get_player_by_name(rsn)
@@ -216,6 +240,11 @@ def parse_slayer(data) -> dict[str, list[str]]:
     slayer_monster = data['extra']['monster']
     kc_required = data['extra']['killCount']
 
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
+
     print(f"SLAYER - {rsn} finished their {slayer_monster} task ({kc_required} kill(s))")
     # print data prettyfied
     # print(json.dumps(data, indent = 2))
@@ -227,6 +256,11 @@ def parse_quest(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     questName = data['extra']['questName']
 
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
+
     print(f"QUEST - {rsn} completed {questName}")
 
     return True
@@ -237,6 +271,11 @@ def parse_clue(data):
     rsn = data['playerName']
     clueType = data['extra']['clueType']
 
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
+
     print(f"CLUE: {rsn} - {clueType}")
     return True
 
@@ -246,6 +285,11 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     rsn = data['playerName']
     boss_name = data['extra']['boss']
     print(f"KILLCOUNT: {rsn} - {boss_name}")
+
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
 
     try:
         quantity = data['extra']['quantity']
@@ -336,6 +380,11 @@ def parse_combat_achievement(data) -> dict[str, list[str]]:
     achievement = data['extra']['task']
     tier = data['extra']['tier']
 
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
+
     print("COMBAT_ACHIEVEMENT: " + rsn + " - " + achievement + " (" + tier + ")")
     return []
 
@@ -347,6 +396,11 @@ def parse_pet(data, img_file) -> dict[str, list[str]]:
     rsn = data['playerName']
     pet = data['extra']['petName']
     print(f"PET: {rsn} - {pet}")
+
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
 
     PET_POINTS = 0.5
     black_listed_pets = []
@@ -392,6 +446,7 @@ def parse_speedrun(data) -> dict[str, list[str]]:
     # print("SPEEDRUN")
     # print data prettyfied
     # print(json.dumps(data, indent = 2))
+
     return False
 
 
@@ -434,6 +489,11 @@ def parse_trade(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     other_rsn = data['extra']['counterparty']
 
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
+
     print(f"TRADE - {rsn} and {other_rsn}")
     rsn_recieved_list = []
     for receivedItem in data['extra']['receivedItems']:
@@ -451,6 +511,11 @@ def parse_chat(data, img_file):
     rsn = data['playerName']
     chat_text = data['extra']['message']
     print(f"CHAT: {rsn} - \"{chat_text}\"")
+
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
 
     tile = database.get_tile_by_drop(chat_text)
     if tile is None:
@@ -519,6 +584,11 @@ def parse_leagues_task(data) -> dict[str, list[str]]:
 def parse_login(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     print(f"LOGIN - {rsn}")
+
+    add_wrapup_player(rsn)
+
+    if os.getenv('TRACKING') == "FALSE":
+        return jsonify({"message": "Not currently tracking"})
 
     return True
 
@@ -589,8 +659,6 @@ def parse_json_data(json_data, img_file) -> dict[str, list[str]]:
 
 @drop_submission_route.route('', methods=['POST'])
 def handle_request():
-    if os.getenv('TRACKING') == "FALSE":
-        return jsonify({"message": "Not currently tracking"})
 
     data = request.form
     try:
