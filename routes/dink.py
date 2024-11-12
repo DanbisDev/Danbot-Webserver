@@ -7,7 +7,7 @@ import json
 from utils import database, db_entities
 from utils.database import add_wrapup_player, add_wrapup_player_gold, add_wrapup_player_deaths, \
     add_wrapup_player_max_level, add_wrapup_player_level, add_wrapup_player_slayer_task, add_wrapup_player_quest, \
-    add_wrapup_player_clue, add_wrapup_player_pb, add_wrapup_player_ca, add_wrapup_player_pets
+    add_wrapup_player_clue, add_wrapup_player_pb, add_wrapup_player_ca, add_wrapup_player_pets, add_wrapup_player_clog
 from utils.db_entities import Player, Team, Tile, Drop
 from utils.send_webhook import send_webhook
 
@@ -112,6 +112,8 @@ def parse_loot(data, img_file) -> dict[str, list[str]]:
         item_each = item['priceEach']
 
         add_wrapup_player_gold(rsn, itemPrice * itemQuantity)
+
+        add_wrapup_player_clog(rsn, itemName, itemQuantity, itemPrice)
 
         if os.getenv('TRACKING') == "FALSE":
             continue

@@ -927,6 +927,29 @@ def add_wrapup_player_level(username):
         # Commit the transaction to save changes
         conn.commit()
 
+def add_wrapup_player_clog(rsn, itemName, itemQuantity, itemPrice):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Try updating the row if the item already exists
+        cursor.execute('''
+            UPDATE wrapup_clogging_uwu
+            SET item_quantity = item_quantity + %s,
+                item_value = %s
+            WHERE item_name = %s
+        ''', (itemQuantity, itemPrice, itemName))
+
+        # If no row was updated, insert a new one
+        if cursor.rowcount == 0:
+            cursor.execute('''
+                INSERT INTO wrapup_clogging_uwu (item_name, item_value, item_quantity, username)
+                VALUES (%s, %s, %s, %s)
+            ''', (itemName, itemPrice, itemQuantity, rsn))
+
+        # Commit the transaction to save changes
+        conn.commit()
+
+
 def add_wrapup_player_quest(username):
     with connect() as conn:
         cursor = conn.cursor()
