@@ -890,6 +890,106 @@ def change_player_team(player_id, new_team_id):
         cursor.execute("UPDATE manual_tile_progress SET team_id = %s WHERE player_id = %s", (new_team_id, player_id,))
         conn.commit()
 
+def add_wrapup_player_clue(username):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the player's gold_gained by adding the given gold
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET clues_completed = clues_completed + %1
+            WHERE username = %s
+        """, (username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET clues_completed = clues_completed + 1
+        """)
+
+        # Commit the transaction to save changes
+        conn.commit()
+
+
+def add_wrapup_player_level(username):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the player's gold_gained by adding the given gold
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET levels_gained = levels_gained + %1
+            WHERE username = %s
+        """, (username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET levels_gained = levels_gained + 1
+        """)
+
+        # Commit the transaction to save changes
+        conn.commit()
+
+def add_wrapup_player_quest(username):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the player's gold_gained by adding the given gold
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET quests_completed = quests_completed + %1
+            WHERE username = %s
+        """, (username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET quests_completed = quests_completed + 1
+        """)
+
+        # Commit the transaction to save changes
+        conn.commit()
+
+def add_wrapup_player_max_level(username):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the player's gold_gained by adding the given gold
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET max_levels_gained = max_levels_gained + %1
+            WHERE username = %s
+        """, (username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET max_levels_gained = max_levels_gained + 1
+        """)
+
+        # Commit the transaction to save changes
+        conn.commit()
+
+def add_wrapup_player_slayer_task(username, task_name, monsters_killed):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the player's gold_gained by adding the given gold
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET slayer_tasks = slayer_tasks + %1
+            WHERE username = %s
+        """, (username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET slayer_tasks = slayer_tasks + 1
+        """)
+
+        cursor.execute("""
+            INSERT INTO wrapup_slayer_tasks (task_name, tasks_completed, monsters_killed)
+            VALUES (%s, 1, %s)
+            ON CONFLICT (task_name)
+            DO UPDATE SET
+            tasks_completed = tasks_completed + 1,
+            monsters_killed = monsters_killed + EXCLUDED.monsters_killed
+        """, (task_name, monsters_killed))
+
+        # Commit the transaction to save changes
+        conn.commit()
+
 def add_wrapup_player_deaths(username):
     with connect() as conn:
         cursor = conn.cursor()
@@ -903,6 +1003,36 @@ def add_wrapup_player_deaths(username):
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET clan_deaths = clan_deaths + 1
+        """)
+
+        # Commit the transaction to save changes
+        conn.commit()
+
+def add_wrapup_player_pets(username):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET pets_gained = pets_gained + 1
+            WHERE username = %s
+        """, (username))
+
+        conn.commit()
+
+def add_wrapup_player_ca(username):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the player's gold_gained by adding the given gold
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET combat_achievements = combat_achievements + 1
+            WHERE username = %s
+        """, (username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET combat_achievements = combat_achievements + 1
         """)
 
         # Commit the transaction to save changes
@@ -946,6 +1076,31 @@ def add_wrapup_player(username, account_hash):
             conn.commit()
             return True
 
+def add_wrapup_player_pb(username, boss_name, time):
+    with connect() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE wrapup_players SET personal_pbs = personal_pbs + 1 WHERE username = %s
+        """, (username, ))
+
+        cursor.execute("""
+            UPDATE wrapup_personal_bests
+            SET
+                best_time = CASE
+                    WHEN %s < best_time THEN %s
+                    ELSE best_time
+                END,
+                username = CASE
+                    WHEN %s < best_time THEN %s
+                    WHEN %s = best_time THEN CONCAT(username, ',', %s)
+                    ELSE username
+                END
+            WHERE boss_name = %s
+        """, (time, time, time, username, time, username, boss_name))
+
+        conn.commit()
+
+
 def database_startup():
     print("connecting to db")
     conn = connect()
@@ -973,17 +1128,21 @@ def database_startup():
             levels_gained integer,
             slayer_tasks integer,
             clues_completed integer,
-            max_levels_gained integer
+            quests_completed integer,
+            max_levels_gained integer,
+            combat_achievements integer
         )
     ''')
+
+    conn.commit()
 
     cursor.execute('SELECT * FROM wrapup_clan_totals')
     if not cursor.fetchone():
         cursor.execute('''
             INSERT INTO wrapup_clan_totals (
                 gold_gains, pet_gains, pbs_set, collection_logs, clan_deaths, 
-                gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained
-            ) VALUES (0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                gold_split, levels_gained, slayer_tasks, clues_completed, quests_completed, max_levels_gained, combat_achievements
+            ) VALUES (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         ''')
 
 
@@ -1000,7 +1159,9 @@ def database_startup():
             levels_gained integer,
             slayer_tasks integer,
             clues_completed integer,
+            quests_completed integer,
             max_levels_gained integer,
+            combat_achievements integer,
             dink_account_hash text
         )
     ''')
@@ -1009,8 +1170,7 @@ def database_startup():
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS wrapup_personal_bests (
-            content_id SERIAL PRIMARY KEY,
-            boss_name text,
+            boss_name text PRIMARY KEY,
             best_time text,
             username TEXT REFERENCES wrapup_players(username) ON DELETE CASCADE ON UPDATE CASCADE
         )
@@ -1022,6 +1182,14 @@ def database_startup():
             item_value integer,
             item_quantity integer,
             username TEXT REFERENCES wrapup_players(username) ON DELETE CASCADE ON UPDATE CASCADE
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS wrapup_slayer_tasks (
+            task_name text PRIMARY KEY,
+            tasks_completed integer,
+            monsters_killed integer
         )
     ''')
 

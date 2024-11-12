@@ -5,7 +5,9 @@ from flask import Blueprint, jsonify, request
 import json
 
 from utils import database, db_entities
-from utils.database import add_wrapup_player, add_wrapup_player_gold, add_wrapup_player_deaths
+from utils.database import add_wrapup_player, add_wrapup_player_gold, add_wrapup_player_deaths, \
+    add_wrapup_player_max_level, add_wrapup_player_level, add_wrapup_player_slayer_task, add_wrapup_player_quest, \
+    add_wrapup_player_clue, add_wrapup_player_pb, add_wrapup_player_ca, add_wrapup_player_pets
 from utils.db_entities import Player, Team, Tile, Drop
 from utils.send_webhook import send_webhook
 
@@ -55,11 +57,18 @@ def parse_level(data) -> dict[str, list[str]]:
     dinkHash = data['dinkAccountHash']
 
     add_wrapup_player(rsn, dinkHash)
+    levelledSkills = data['extra']['levelledSkills']
+
+    for skill in levelledSkills:
+        skill_level = data['extra']['allSkills'][skill]
+        if skill_level == 99:
+            add_wrapup_player_max_level(rsn)
+        add_wrapup_player_level(rsn)
+
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
 
-    levelledSkills = data['extra']['levelledSkills']
     print(f"LEVEL - {rsn} levelled up {levelledSkills}")
     return True
 
@@ -252,6 +261,8 @@ def parse_slayer(data) -> dict[str, list[str]]:
 
     add_wrapup_player(rsn, dinkHash)
 
+    add_wrapup_player_slayer_task(rsn, slayer_monster, kc_required)
+
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
 
@@ -269,6 +280,8 @@ def parse_quest(data) -> dict[str, list[str]]:
 
     add_wrapup_player(rsn, dinkHash)
 
+    add_wrapup_player_quest(rsn)
+
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
 
@@ -285,6 +298,8 @@ def parse_clue(data):
 
     add_wrapup_player(rsn, dinkHash)
 
+    add_wrapup_player_clue(rsn)
+
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
 
@@ -299,6 +314,13 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     dinkHash = data['dinkAccountHash']
 
     add_wrapup_player(rsn, dinkHash)
+
+
+    content = data['content']
+    if content.splitlines()[0] == "TRUE":
+        add_wrapup_player_pb(rsn, boss_name, content.splitlines()[1])
+
+
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
@@ -395,6 +417,8 @@ def parse_combat_achievement(data) -> dict[str, list[str]]:
 
     add_wrapup_player(rsn, dinkHash)
 
+    add_wrapup_player_ca(rsn)
+
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
 
@@ -412,6 +436,8 @@ def parse_pet(data, img_file) -> dict[str, list[str]]:
     dinkHash = data['dinkAccountHash']
 
     add_wrapup_player(rsn, dinkHash)
+
+    add_wrapup_player_pets(rsn)
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
