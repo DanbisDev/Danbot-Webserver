@@ -899,7 +899,7 @@ def add_wrapup_player_clue(username):
             UPDATE wrapup_players
             SET clues_completed = clues_completed + 1
             WHERE username = %s
-        """, (username))
+        """, (username, ))
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET clues_completed = clues_completed + 1
@@ -918,7 +918,7 @@ def add_wrapup_player_level(username):
             UPDATE wrapup_players
             SET levels_gained = levels_gained + 1
             WHERE username = %s
-        """, (username))
+        """, (username, ))
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET levels_gained = levels_gained + 1
@@ -959,7 +959,7 @@ def add_wrapup_player_quest(username):
             UPDATE wrapup_players
             SET quests_completed = quests_completed + 1
             WHERE username = %s
-        """, (username))
+        """, (username, ))
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET quests_completed = quests_completed + 1
@@ -977,7 +977,7 @@ def add_wrapup_player_max_level(username):
             UPDATE wrapup_players
             SET max_levels_gained = max_levels_gained + 1
             WHERE username = %s
-        """, (username))
+        """, (username, ))
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET max_levels_gained = max_levels_gained + 1
@@ -995,7 +995,7 @@ def add_wrapup_player_slayer_task(username, task_name, monsters_killed):
             UPDATE wrapup_players
             SET slayer_tasks = slayer_tasks + 1
             WHERE username = %s
-        """, (username))
+        """, (username, ))
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET slayer_tasks = slayer_tasks + 1
@@ -1022,7 +1022,7 @@ def add_wrapup_player_deaths(username):
             UPDATE wrapup_players
             SET player_deaths = player_deaths + 1
             WHERE username = %s
-        """, username)
+        """, (username, ))
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET clan_deaths = clan_deaths + 1
@@ -1039,7 +1039,7 @@ def add_wrapup_player_pets(username):
             UPDATE wrapup_players
             SET pets_gained = pets_gained + 1
             WHERE username = %s
-        """, (username))
+        """, (username, ))
 
         conn.commit()
 
@@ -1052,7 +1052,7 @@ def add_wrapup_player_ca(username):
             UPDATE wrapup_players
             SET combat_achievements = combat_achievements + 1
             WHERE username = %s
-        """, (username))
+        """, (username, ))
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET combat_achievements = combat_achievements + 1
