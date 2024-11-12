@@ -1347,7 +1347,7 @@ def reset_bingo_tables():
                 team_id integer,
                 tile_id integer,
                 progress real,
-                manual_tile_progress_pk SERIAL PRIMARY KEY ON DELETE CASCADE ON UPDATE CASCADE,
+                manual_tile_progress_pk SERIAL PRIMARY KEY,
                 FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY (player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE
