@@ -19,7 +19,7 @@ def parse_death(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
         add_wrapup_player_deaths(rsn)
@@ -43,7 +43,7 @@ def parse_collection(data) -> dict[str, list[str]]:
     itemName = data['extra']['itemName']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
@@ -58,7 +58,7 @@ def parse_level(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
         levelledSkills = data['extra']['levelledSkills']
 
@@ -86,7 +86,7 @@ def parse_loot(data, img_file) -> dict[str, list[str]]:
     # Get item source
     itemSource = data['extra']['source']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
         # Get item list
@@ -274,7 +274,7 @@ def parse_slayer(data) -> dict[str, list[str]]:
     dinkHash = data['dinkAccountHash']
 
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
         add_wrapup_player_slayer_task(rsn, slayer_monster, kc_required)
@@ -294,7 +294,7 @@ def parse_quest(data) -> dict[str, list[str]]:
     questName = data['extra']['questName']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
         add_wrapup_player_quest(rsn)
@@ -313,7 +313,7 @@ def parse_clue(data):
     clueType = data['extra']['clueType']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
         add_wrapup_player_clue(rsn)
@@ -331,7 +331,7 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     boss_name = data['extra']['boss']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
 
@@ -434,7 +434,7 @@ def parse_combat_achievement(data) -> dict[str, list[str]]:
     tier = data['extra']['tier']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
         add_wrapup_player_ca(rsn)
@@ -455,7 +455,7 @@ def parse_pet(data, img_file) -> dict[str, list[str]]:
     print(f"PET: {rsn} - {pet}")
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
         add_wrapup_player_pets(rsn)
@@ -550,7 +550,7 @@ def parse_trade(data) -> dict[str, list[str]]:
     other_rsn = data['extra']['counterparty']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
@@ -574,7 +574,7 @@ def parse_chat(data, img_file):
     chat_text = data['extra']['message']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
@@ -648,7 +648,7 @@ def parse_login(data) -> dict[str, list[str]]:
     rsn = data['playerName']
     dinkHash = data['dinkAccountHash']
 
-    if data['clanName'] == "Fatalis":
+    if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
     if os.getenv('TRACKING') == "FALSE":
