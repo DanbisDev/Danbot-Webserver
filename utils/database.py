@@ -1068,10 +1068,10 @@ def add_wrapup_player(username, account_hash):
             cursor.execute(
                 """
                 INSERT INTO wrapup_players (player_deaths, gold_gained, pets_gained, personal_collection_logs, 
-                personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained, dink_account_hash) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                personal_pbs, username, gold_split, levels_gained, slayer_tasks, clues_completed, max_levels_gained, dink_account_hash, quests_completed, combat_achievements) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, account_hash)
+                (0, 0, 0, 0, 0, username, 0, 0, 0, 0, 0, account_hash, 0, 0)
             )
             conn.commit()
             return True
