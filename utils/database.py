@@ -1022,7 +1022,7 @@ def add_wrapup_player_deaths(username):
             UPDATE wrapup_players
             SET player_deaths = player_deaths + 1
             WHERE username = %s
-        """, (username))
+        """, username)
 
         cursor.execute("""
             UPDATE wrapup_clan_totals SET clan_deaths = clan_deaths + 1

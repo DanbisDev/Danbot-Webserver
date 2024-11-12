@@ -81,19 +81,6 @@ def parse_loot(data, img_file) -> dict[str, list[str]]:
 
     add_wrapup_player(rsn, dinkHash)
 
-
-
-    # Handle discord attachment
-    player = database.get_player_by_name(rsn)
-    if player is None:
-        return False
-    player = db_entities.Player(player)
-
-    team = database.get_team_by_id(player.team_id)
-    if team is None:
-        return False
-    team = db_entities.Team(team)
-
     source = data['extra']['source']
     # Get item source
     itemSource = data['extra']['source']
@@ -115,9 +102,30 @@ def parse_loot(data, img_file) -> dict[str, list[str]]:
 
         add_wrapup_player_clog(rsn, itemName, itemQuantity, itemPrice)
 
-        if os.getenv('TRACKING') == "FALSE":
-            continue
 
+    if os.getenv('TRACKING') == "FALSE":
+        return
+
+    # Handle discord attachment
+    player = database.get_player_by_name(rsn)
+    if player is None:
+        return False
+    player = db_entities.Player(player)
+
+    team = database.get_team_by_id(player.team_id)
+    if team is None:
+        return False
+    team = db_entities.Team(team)
+
+    for item in items:
+        # Get item name
+        itemName = item['name']
+        # Get item price
+        itemPrice = item['priceEach']
+        # Get item quantity
+        itemQuantity = item['quantity']
+        # Get item total
+        item_each = item['priceEach']
         # Add the item to the database
         print(f"LOOT: {player.player_name} - {itemName} x {itemQuantity} ({itemQuantity * itemPrice})")
         drop_pk = database.add_drop(team.team_id, player.player_id, rsn, itemName, item_each, itemQuantity, itemSource)
