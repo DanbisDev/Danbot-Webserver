@@ -996,28 +996,31 @@ def add_wrapup_player_slayer_task(username, task_name, monsters_killed):
     with connect() as conn:
         cursor = conn.cursor()
 
-        # Update the player's gold_gained by adding the given gold
+        # Increment slayer tasks for the specified player
         cursor.execute("""
             UPDATE wrapup_players
             SET slayer_tasks = slayer_tasks + 1
             WHERE username = %s
-        """, (username, ))
+        """, (username,))
 
+        # Increment slayer tasks for the entire clan
         cursor.execute("""
             UPDATE wrapup_clan_totals SET slayer_tasks = slayer_tasks + 1
         """)
 
+        # Insert a new slayer task or update existing task counts
         cursor.execute("""
             INSERT INTO wrapup_slayer_tasks (task_name, tasks_completed, monsters_killed)
             VALUES (%s, 1, %s)
             ON CONFLICT (task_name)
             DO UPDATE SET
-            tasks_completed = tasks_completed + 1,
-            monsters_killed = monsters_killed + EXCLUDED.monsters_killed
+                tasks_completed = tasks_completed + 1,
+                monsters_killed = monsters_killed + EXCLUDED.monsters_killed
         """, (task_name, monsters_killed))
 
         # Commit the transaction to save changes
         conn.commit()
+
 
 def add_wrapup_player_deaths(username):
     with connect() as conn:
