@@ -897,7 +897,7 @@ def add_wrapup_player_clue(username):
         # Update the player's gold_gained by adding the given gold
         cursor.execute("""
             UPDATE wrapup_players
-            SET clues_completed = clues_completed + %1
+            SET clues_completed = clues_completed + 1
             WHERE username = %s
         """, (username))
 
@@ -916,7 +916,7 @@ def add_wrapup_player_level(username):
         # Update the player's gold_gained by adding the given gold
         cursor.execute("""
             UPDATE wrapup_players
-            SET levels_gained = levels_gained + %1
+            SET levels_gained = levels_gained + 1
             WHERE username = %s
         """, (username))
 
@@ -934,7 +934,7 @@ def add_wrapup_player_quest(username):
         # Update the player's gold_gained by adding the given gold
         cursor.execute("""
             UPDATE wrapup_players
-            SET quests_completed = quests_completed + %1
+            SET quests_completed = quests_completed + 1
             WHERE username = %s
         """, (username))
 
@@ -952,7 +952,7 @@ def add_wrapup_player_max_level(username):
         # Update the player's gold_gained by adding the given gold
         cursor.execute("""
             UPDATE wrapup_players
-            SET max_levels_gained = max_levels_gained + %1
+            SET max_levels_gained = max_levels_gained + 1
             WHERE username = %s
         """, (username))
 
@@ -970,7 +970,7 @@ def add_wrapup_player_slayer_task(username, task_name, monsters_killed):
         # Update the player's gold_gained by adding the given gold
         cursor.execute("""
             UPDATE wrapup_players
-            SET slayer_tasks = slayer_tasks + %1
+            SET slayer_tasks = slayer_tasks + 1
             WHERE username = %s
         """, (username))
 
@@ -997,7 +997,7 @@ def add_wrapup_player_deaths(username):
         # Update the player's gold_gained by adding the given gold
         cursor.execute("""
             UPDATE wrapup_players
-            SET player_deaths = player_deaths + %1
+            SET player_deaths = player_deaths + 1
             WHERE username = %s
         """, (username))
 
