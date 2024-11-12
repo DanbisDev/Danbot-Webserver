@@ -1014,12 +1014,13 @@ def add_wrapup_player_slayer_task(username, task_name, monsters_killed):
             VALUES (%s, 1, %s)
             ON CONFLICT (task_name)
             DO UPDATE SET
-                tasks_completed = tasks_completed + 1,
-                monsters_killed = monsters_killed + EXCLUDED.monsters_killed
+                wrapup_slayer_tasks.tasks_completed = wrapup_slayer_tasks.tasks_completed + 1,
+                wrapup_slayer_tasks.monsters_killed = wrapup_slayer_tasks.monsters_killed + EXCLUDED.monsters_killed
         """, (task_name, monsters_killed))
 
         # Commit the transaction to save changes
         conn.commit()
+
 
 
 def add_wrapup_player_deaths(username):
