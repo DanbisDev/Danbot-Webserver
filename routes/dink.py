@@ -458,6 +458,8 @@ def parse_pet(data, img_file) -> dict[str, list[str]]:
 
         add_wrapup_player_pets(rsn)
 
+        add_wrapup_player_clog(rsn, pet, 1, 0)
+
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
 
