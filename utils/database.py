@@ -1055,6 +1055,11 @@ def add_wrapup_player_pets(username):
             WHERE username = %s
         """, (username, ))
 
+        cursor.execute("""
+            UPDATE wrapup_clan_totals
+            SET pet_gains = pets_gains + 1
+        """)
+
         conn.commit()
 
 def add_wrapup_player_ca(username):
@@ -1134,7 +1139,7 @@ def add_wrapup_player_pb(username, boss_name, time):
                     WHEN EXCLUDED.best_time < wrapup_personal_bests.best_time THEN EXCLUDED.username
                     WHEN EXCLUDED.best_time = wrapup_personal_bests.best_time THEN CONCAT(wrapup_personal_bests.username, ',', EXCLUDED.username)
                     ELSE wrapup_personal_bests.username
-                END
+                ENDad
         """, (boss_name, time, username))
 
         cursor.execute("""
