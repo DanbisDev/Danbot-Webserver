@@ -1120,20 +1120,26 @@ def add_wrapup_player_pb(username, boss_name, time):
             UPDATE wrapup_players SET personal_pbs = personal_pbs + 1 WHERE username = %s
         """, (username, ))
 
+        # Insert or update personal bests
         cursor.execute("""
-            UPDATE wrapup_personal_bests
-            SET
+            INSERT INTO wrapup_personal_bests (boss_name, best_time, username)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (boss_name)
+            DO UPDATE SET
                 best_time = CASE
-                    WHEN %s < best_time THEN %s
-                    ELSE best_time
+                    WHEN EXCLUDED.best_time < wrapup_personal_bests.best_time THEN EXCLUDED.best_time
+                    ELSE wrapup_personal_bests.best_time
                 END,
                 username = CASE
-                    WHEN %s < best_time THEN %s
-                    WHEN %s = best_time THEN CONCAT(username, ',', %s)
-                    ELSE username
+                    WHEN EXCLUDED.best_time < wrapup_personal_bests.best_time THEN EXCLUDED.username
+                    WHEN EXCLUDED.best_time = wrapup_personal_bests.best_time THEN CONCAT(wrapup_personal_bests.username, ',', EXCLUDED.username)
+                    ELSE wrapup_personal_bests.username
                 END
-            WHERE boss_name = %s
-        """, (time, time, time, username, time, username, boss_name))
+        """, (boss_name, time, username))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET pbs_set = pbs_set + 1
+        """)
 
         conn.commit()
 
