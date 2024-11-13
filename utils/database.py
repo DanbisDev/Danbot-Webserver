@@ -952,6 +952,10 @@ def add_wrapup_player_clog(rsn, itemName, itemQuantity, itemPrice):
             WHERE username = %s
             ''', (rsn, ))
 
+            cursor.execute('''
+                UPDATE wrapup_clan_totals
+                set collection_logs = collection_logs + 1
+                ''')
         # Commit the transaction to save changes
         conn.commit()
 

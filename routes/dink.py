@@ -334,12 +334,10 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
-
-    content = data['content']
-    if content.splitlines()[0] == "TRUE":
-        add_wrapup_player_pb(rsn, boss_name, content.splitlines()[1])
-
-
+    content = data.get('content')
+    if content:
+        if content.splitlines()[0] == "TRUE":
+            add_wrapup_player_pb(rsn, boss_name, content.splitlines()[1])
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
