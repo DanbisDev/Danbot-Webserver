@@ -336,10 +336,9 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
 
     content = data.get('content')
     if content:
-        if content.splitlines()[0] == "TRUE\n":
+        if content.splitlines()[0] == "TRUE":
             add_wrapup_player_pb(rsn, boss_name, content.splitlines()[1])
-        else:
-            print(f"Content found but was not TRUE: {content.splitlines()[0]}")
+
     else:
         print(f"Content not found: {data}")
 
