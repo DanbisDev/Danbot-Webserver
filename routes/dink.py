@@ -338,7 +338,8 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     if content:
         if content.splitlines()[0] == "TRUE":
             add_wrapup_player_pb(rsn, boss_name, content.splitlines()[1])
-
+    else:
+        print(f"Content not found: {data}")
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
 
