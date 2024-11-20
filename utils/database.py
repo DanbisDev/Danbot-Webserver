@@ -1057,7 +1057,7 @@ def add_wrapup_player_pets(username):
 
         cursor.execute("""
             UPDATE wrapup_clan_totals
-            SET pet_gains = pets_gains + 1
+            SET pet_gains = pet_gains + 1
         """)
 
         conn.commit()
