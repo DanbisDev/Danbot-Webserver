@@ -347,7 +347,9 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
             total_seconds = timedelta(hours=hours, minutes=minutes, seconds=seconds).total_seconds()
             add_wrapup_player_pb(rsn, boss_name, total_seconds)
         else:
-            raise ValueError("Invalid time format")
+            print(f"Invalid time format: {unparsed_time}")
+    else:
+        print("no time found")
 
 
 
