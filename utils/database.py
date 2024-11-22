@@ -1692,27 +1692,31 @@ def get_relevant_drops_by_item_name_and_team_id(item, team_id):
         return cursor.fetchall()
 
 
-def get_wrapup_player_split(player_name, amount_split):
+def get_wrapup_player_split(player_name):
     # Assuming you have a function to establish a database connection
     with connect() as conn:
         cursor = conn.cursor()
 
-        # Update the gold_split value for the given player
+        # Retrieve the current gold_split value for the given player
         cursor.execute("""
-            UPDATE wrapup_players
-            SET gold_split = gold_split + %s
+            SELECT gold_split
+            FROM wrapup_players
             WHERE username = %s
-            RETURNING gold_split
-        """, (amount_split, player_name))
+        """, (player_name,))
 
-        # Fetch the updated gold_split value
-        updated_gold_split = cursor.fetchone()[0]
+        # Fetch the result (this will be a tuple containing the gold_split)
+        result = cursor.fetchone()
 
-        # Commit the changes to the database
-        conn.commit()
+        # If no player is found, return None or a default value
+        if result is None:
+            return None  # Or return 0 if you'd prefer to have a default value
 
-    # Return the updated gold_split as an integer
-    return int(updated_gold_split)
+        # Extract the gold_split value from the result tuple
+        gold_split = result[0]
+
+    # Return the gold_split as an integer
+    return int(gold_split)
+
 
 def add_wrapup_player_split(player_name, amount_split):
     with connect() as conn:
@@ -1779,4 +1783,4 @@ def get_wrapup_personal_best(boss_name):
         # Convert the best_time from string (e.g., "PT1H30M45S") to total seconds
         best_time_str, username = result
 
-        return int(best_time_str), username
+        return int(float(best_time_str)), username
