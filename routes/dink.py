@@ -355,7 +355,7 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
         else:
             print(f"Invalid time format: {unparsed_time}")
     else:
-        print("no time found")
+        print(f"no time found {data}")
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
