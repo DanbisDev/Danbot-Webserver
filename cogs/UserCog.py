@@ -8,6 +8,7 @@ from discord.ext import commands
 from utils import bingo, database, db_entities
 from utils.autocomplete import player_names, team_names, tile_names, fuzzy_autocomplete, wrapup_player_names, \
     wrapup_boss_names
+from utils.scapify import int_to_gp, gp_to_int
 
 ftext = "\u001b["
 
@@ -78,9 +79,9 @@ class UserCog(commands.Cog):
     @discord.slash_command(name="add_split", description="Add split to your account!")
     async def add_split(self, ctx: discord.ApplicationContext,
                         player_name: discord.Option(str, "What is your username?", autocomplete=lambda ctx: fuzzy_autocomplete(ctx, wrapup_player_names())),
-                        amount_split: discord.Option(int, "How much gold did you split?")):
+                        amount_split: discord.Option(str, "How much gold did you split?")):
         await ctx.defer()
-        database.add_wrapup_player_split(player_name, amount_split)
+        database.add_wrapup_player_split(player_name, gp_to_int(amount_split))
         await ctx.respond(f"Successfully added {amount_split} to {player_name}!")
 
     @discord.slash_command(name="get_splits", description="Shows how much gold you have split on your account!")
@@ -88,7 +89,7 @@ class UserCog(commands.Cog):
                         player_name: discord.Option(str, "What is your username?", autocomplete=lambda ctx: fuzzy_autocomplete(ctx, wrapup_player_names()))):
         await ctx.defer()
         player_splits = database.get_wrapup_player_split(player_name)
-        await ctx.respond(f"You have split {player_splits} gold!")
+        await ctx.respond(f"You have split {int_to_gp(player_splits)} gold!")
 
     import discord
     import datetime
