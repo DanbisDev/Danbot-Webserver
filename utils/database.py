@@ -1690,3 +1690,93 @@ def get_relevant_drops_by_item_name_and_team_id(item, team_id):
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM relevant_drops where team_id = %s and lower(drop_name) = lower(%s)", (team_id, item,))
         return cursor.fetchall()
+
+
+def get_wrapup_player_split(player_name, amount_split):
+    # Assuming you have a function to establish a database connection
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Update the gold_split value for the given player
+        cursor.execute("""
+            UPDATE wrapup_players
+            SET gold_split = gold_split + %s
+            WHERE username = %s
+            RETURNING gold_split
+        """, (amount_split, player_name))
+
+        # Fetch the updated gold_split value
+        updated_gold_split = cursor.fetchone()[0]
+
+        # Commit the changes to the database
+        conn.commit()
+
+    # Return the updated gold_split as an integer
+    return int(updated_gold_split)
+
+def add_wrapup_player_split(player_name, amount_split):
+    with connect() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+                UPDATE wrapup_players
+                SET gold_split = gold_split + %s
+                WHERE username = %s
+            """, (amount_split, player_name, ))
+
+        cursor.execute("""
+            UPDATE wrapup_clan_totals SET gold_split = gold_split + %s
+
+            """, (amount_split, ))
+    return None
+
+
+def get_all_wrapup_player_names():
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Execute the query to get all player names
+        cursor.execute("SELECT username FROM wrapup_players")
+
+        # Fetch all results (this returns a list of tuples)
+        player_names = cursor.fetchall()
+
+        # Extract the usernames from the tuple and return as a list of strings
+        return [name[0] for name in player_names]
+
+
+def get_all_wrapup_boss_names():
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Execute the query to get all boss names
+        cursor.execute("SELECT boss_name FROM wrapup_personal_bests")
+
+        # Fetch all results (this returns a list of tuples)
+        boss_names = cursor.fetchall()
+
+        # Extract the boss names from the tuple and return as a list of strings
+        return [boss[0] for boss in boss_names]
+
+
+def get_wrapup_personal_best(boss_name):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        # Execute the query to get the personal best time and the username for the given boss_name
+        cursor.execute("""
+            SELECT best_time, username
+            FROM wrapup_personal_bests
+            WHERE boss_name = %s
+        """, (boss_name,))
+
+        # Fetch the result (this will be a tuple containing the best_time and username)
+        result = cursor.fetchone()
+
+        # If no record is found, return None
+        if result is None:
+            return None, None
+
+        # Convert the best_time from string (e.g., "PT1H30M45S") to total seconds
+        best_time_str, username = result
+
+        return int(best_time_str), username

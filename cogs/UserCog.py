@@ -6,7 +6,8 @@ import discord
 from discord.ext import commands
 
 from utils import bingo, database, db_entities
-from utils.autocomplete import player_names, team_names, tile_names, fuzzy_autocomplete
+from utils.autocomplete import player_names, team_names, tile_names, fuzzy_autocomplete, wrapup_player_names, \
+    wrapup_boss_names
 
 ftext = "\u001b["
 
@@ -47,9 +48,10 @@ class UserCog(commands.Cog):
             "dink": "Use this command to get help setting up your dink plugin.",
             "player": "Get a bunch of data about a player in the bingo.",
             "team": "Get a bunch of data about a team in the bingo.",
-            "progress": "Check your progress on a specific tile.",
-            "board": "Get a list of tiles you've already completed.",
-            "leaderboard": "Show the current standings amongst teams and players."
+            "leaderboard": "Show the current standings amongst teams and players.",
+            "add_split": "Add split to your account!",
+            "get_splits": "Shows how much gold you have split on your account!",
+            "pb": "Shows the current personal (clan) best time for a given boss"
         }
 
         response = "**Here are all my available commands:**\n\n"
@@ -72,6 +74,61 @@ class UserCog(commands.Cog):
         server_ip = os.getenv('SERVER_IP')
         player_url = f"http://{server_ip}/user/player/{player_name.replace(' ', '%20')}"
         await ctx.respond(player_url)
+
+    @discord.slash_command(name="add_split", description="Add split to your account!")
+    async def add_split(self, ctx: discord.ApplicationContext,
+                        player_name: discord.Option(str, "What is your username?", autocomplete=lambda ctx: fuzzy_autocomplete(ctx, wrapup_player_names())),
+                        amount_split: discord.Option(int, "How much gold did you split?")):
+        await ctx.defer()
+        database.add_wrapup_player_split(player_name, amount_split)
+        await ctx.respond(f"Successfully added {amount_split} to {player_name}!")
+
+    @discord.slash_command(name="get_splits", description="Shows how much gold you have split on your account!")
+    async def get_split(self, ctx: discord.ApplicationContext,
+                        player_name: discord.Option(str, "What is your username?", autocomplete=lambda ctx: fuzzy_autocomplete(ctx, wrapup_player_names()))):
+        await ctx.defer()
+        player_splits = database.get_wrapup_player_split(player_name)
+        await ctx.respond(f"You have split {player_splits} gold!")
+
+    import discord
+    import datetime
+
+    @discord.slash_command(name="pb", description="Get the clan's current personal best")
+    async def pb(self, ctx: discord.ApplicationContext,
+                 boss_name: discord.Option(str, "What is the bossname?",
+                                           autocomplete=lambda ctx: fuzzy_autocomplete(ctx, wrapup_boss_names()))):
+        await ctx.defer()
+
+        # Retrieve the personal best (pb) and players from the database
+        pb, players = database.get_wrapup_personal_best(boss_name)
+
+        if pb is None:
+            await ctx.respond(f"There is no personal best found for {boss_name}...")
+
+        # Convert total seconds (pb) into a readable format
+        def format_time(seconds):
+            # Calculate hours, minutes, and seconds
+            hours = seconds // 3600
+            minutes = (seconds % 3600) // 60
+            seconds = seconds % 60
+
+            # Build the time string
+            time_str = []
+            if hours > 0:
+                time_str.append(f"{hours} hour{'s' if hours > 1 else ''}")
+            if minutes > 0:
+                time_str.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
+            if seconds > 0 or len(time_str) == 0:  # Always show seconds if there's no hours or minutes
+                time_str.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+
+            # Join and return the formatted string
+            return ", ".join(time_str)
+
+        # Format the personal best time
+        formatted_pb = format_time(pb)
+
+        # Respond with the formatted personal best time and the players
+        await ctx.respond(f"The Fatalis personal best for {boss_name} is {formatted_pb} gotten by {players}")
 
     @discord.slash_command(name="team", description="Get a bunch of data about a team in the bingo")
     async def team(self, ctx: discord.ApplicationContext,
@@ -104,69 +161,7 @@ class UserCog(commands.Cog):
                               f"https://danbot.up.railway.app/static/images/setups/{setup}/budget.png\n")
         return
 
-    @discord.slash_command(name="progress", description="Check your progress on a specific tile")
-    async def progress(self, ctx:discord.ApplicationContext,
-                       team_name: discord.Option(str, "What is your team name?", autocomplete=lambda ctx: fuzzy_autocomplete(ctx, team_names())),
-                       tile_name: discord.Option(str, "What tile are you checking?", autocomplete=lambda ctx: fuzzy_autocomplete(ctx, tile_names()))):
-        await ctx.defer()
-        team = db_entities.Team(database.get_team_by_name(team_name))
-        tile = db_entities.Tile(database.get_tile_by_name(tile_name))
-        progress = bingo.check_progress(tile, team)
-        if progress is None:
-            await ctx.respond(f"You have fully completed {tile.tile_name}!")
-        else:
-            await ctx.respond(progress)
 
-    @discord.slash_command(name="board", description="Get a list of tiles you've already completed")
-    async def board(self, ctx:discord.ApplicationContext,
-                    team_name: discord.Option(str, "What is your team name?", autocomplete=lambda ctx: fuzzy_autocomplete(ctx, team_names())),
-                    board_type: discord.Option(str, "What kind of board would you like to see?", autocomplete=discord.utils.basic_autocomplete(["All Tiles","Completed Tiles","Incomplete Tiles", "Partial Tiles"]))):
-        await ctx.defer()
-        response = f"## {board_type} for {team_name}\n"
-        team = db_entities.Team(database.get_team_by_name(team_name))
-        tiles = database.get_tiles()
-        completed_tiles = database.get_completed_tiles()
-        complete_tile_dict = defaultdict(int)
-        for tile in completed_tiles:
-            tile = db_entities.CompletedTile(tile)
-            if tile.team_id == team.team_id:
-                complete_tile_dict[tile.tile_id] = complete_tile_dict[tile.tile_id] + 1
-
-        if board_type == "All Tiles":
-            for tile in tiles:
-                tile = db_entities.Tile(tile)
-                if complete_tile_dict != 0:
-                    response = response + f"{tile.tile_name}: "
-                    for i in range(min(complete_tile_dict[tile.tile_id], tile.tile_repetition)):
-                        response = response + ":white_check_mark:"
-                    for i in range(0, tile.tile_repetition - complete_tile_dict[tile.tile_id]):
-                        response = response + ":x:"
-                    response = response + "\n"
-        elif board_type == "Completed Tiles":
-            for tile in tiles:
-                tile = db_entities.Tile(tile)
-                if complete_tile_dict[tile.tile_id] > 0:
-                    response = response + f"{tile.tile_name}: "
-                    for i in range(min(complete_tile_dict[tile.tile_id], tile.tile_repetition)):
-                        response = response + ":white_check_mark:"
-                    for i in range(0, tile.tile_repetition - complete_tile_dict[tile.tile_id]):
-                        response = response + ":x:"
-        elif board_type == "Incomplete Tiles":
-            for tile in tiles:
-                tile = db_entities.Tile(tile)
-                if complete_tile_dict[tile.tile_id] == 0:
-                    response = response + f"{tile.tile_name}: "
-                    for i in range(0, tile.tile_repetition - complete_tile_dict[tile.tile_id]):
-                        response = response + ":x:"
-                    response = response + "\n"
-        elif board_type == "Partial Tiles":
-            for tile in tiles:
-                tile = db_entities.Tile(tile)
-                progress = bingo.check_progress(tile, team)
-                if progress is not None:
-                    response = response + progress
-
-        await ctx.respond(response)
 
     @discord.slash_command(name="leaderboard", description="Show the current standings amongst teams and players")
     async def leaderboard(self, ctx: discord.ApplicationContext):

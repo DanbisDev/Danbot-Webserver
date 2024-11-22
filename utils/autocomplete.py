@@ -38,6 +38,12 @@ def player_names():
         player_names.append(player.player_name)
     return player_names
 
+def wrapup_player_names():
+    return database.get_all_wrapup_player_names()
+
+def wrapup_boss_names():
+    return database.get_all_wrapup_boss_names()
+
 def fuzzy_autocomplete(ctx: discord.AutocompleteContext, choices):
     def get_matches(string, choices, limit=25):
         results = process.extract(string, choices, limit=limit)
