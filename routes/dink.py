@@ -337,25 +337,25 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
-    unparsed_time = data.get('extra').get('time')
-    if unparsed_time:
-        match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)(\d+(\.\d+)?)S', unparsed_time)
-        if match:
-            # Extract hours (default to 0 if not present), minutes, and seconds
-            hours = int(match.group(1) or 0)
-            minutes = int(match.group(2))
-            seconds = float(match.group(3))
+        unparsed_time = data.get('extra').get('time')
+        if unparsed_time:
+            match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)(\d+(\.\d+)?)S', unparsed_time)
+            if match:
+                # Extract hours (default to 0 if not present), minutes, and seconds
+                hours = int(match.group(1) or 0)
+                minutes = int(match.group(2))
+                seconds = float(match.group(3))
 
-            # Round up the seconds to the nearest whole number
-            rounded_seconds = ceil(seconds)
+                # Round up the seconds to the nearest whole number
+                rounded_seconds = ceil(seconds)
 
-            # Convert to total seconds
-            total_seconds = timedelta(hours=hours, minutes=minutes, seconds=rounded_seconds).total_seconds()
-            add_wrapup_player_pb(rsn, boss_name, total_seconds)
+                # Convert to total seconds
+                total_seconds = timedelta(hours=hours, minutes=minutes, seconds=rounded_seconds).total_seconds()
+                add_wrapup_player_pb(rsn, boss_name, total_seconds)
+            else:
+                print(f"Invalid time format: {unparsed_time}")
         else:
-            print(f"Invalid time format: {unparsed_time}")
-    else:
-        print(f"no time found {data}")
+            print(f"no time found {data}")
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
