@@ -1220,7 +1220,7 @@ def database_startup():
         CREATE TABLE IF NOT EXISTS wrapup_personal_bests (
             boss_name text PRIMARY KEY,
             best_time text,
-            username TEXT REFERENCES wrapup_players(username) ON DELETE CASCADE ON UPDATE CASCADE
+            username text
         )
     ''')
 
