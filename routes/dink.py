@@ -334,10 +334,22 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
     if data.get('clanName') == "Fatalis":
         add_wrapup_player(rsn, dinkHash)
 
-    content = data.get('content')
-    if content:
-        if content.splitlines()[0].strip() == "TRUE":
-            add_wrapup_player_pb(rsn, boss_name, content.splitlines()[1].strip())
+    unparsed_time = data.get('extra').get('time')
+    if unparsed_time:
+        match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)(\d+)S', time_str)
+        if match:
+            # Extract hours, minutes, and seconds
+            hours = int(match.group(1) or 0)  # Default to 0 if no hours
+            minutes = int(match.group(2))
+            seconds = int(match.group(3))
+
+            # Convert to total seconds
+            total_seconds = timedelta(hours=hours, minutes=minutes, seconds=seconds).total_seconds()
+            add_wrapup_player_pb(rsn, boss_name, total_seconds)
+        else:
+            raise ValueError("Invalid time format")
+
+
 
     else:
         print(f"Content not found: {data}")
