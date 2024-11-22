@@ -1139,7 +1139,7 @@ def add_wrapup_player_pb(username, boss_name, time):
                     WHEN EXCLUDED.best_time < wrapup_personal_bests.best_time THEN EXCLUDED.username
                     WHEN EXCLUDED.best_time = wrapup_personal_bests.best_time THEN CONCAT(wrapup_personal_bests.username, ',', EXCLUDED.username)
                     ELSE wrapup_personal_bests.username
-                ENDad
+                END
         """, (boss_name, time, username))
 
         cursor.execute("""
