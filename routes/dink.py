@@ -1,5 +1,7 @@
 import os
+import re
 from collections import defaultdict
+from datetime import timedelta
 
 from flask import Blueprint, jsonify, request
 import json
@@ -336,7 +338,7 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
 
     unparsed_time = data.get('extra').get('time')
     if unparsed_time:
-        match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)(\d+)S', time_str)
+        match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)(\d+)S', unparsed_time)
         if match:
             # Extract hours, minutes, and seconds
             hours = int(match.group(1) or 0)  # Default to 0 if no hours
@@ -350,11 +352,6 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
             print(f"Invalid time format: {unparsed_time}")
     else:
         print("no time found")
-
-
-
-    else:
-        print(f"Content not found: {data}")
 
     if os.getenv('TRACKING') == "FALSE":
         return jsonify({"message": "Not currently tracking"})
