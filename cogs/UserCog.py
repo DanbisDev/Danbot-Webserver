@@ -81,7 +81,10 @@ class UserCog(commands.Cog):
                         player_name: discord.Option(str, "What is your username?", autocomplete=lambda ctx: fuzzy_autocomplete(ctx, wrapup_player_names())),
                         amount_split: discord.Option(str, "How much gold did you split?")):
         await ctx.defer()
-        database.add_wrapup_player_split(player_name, gp_to_int(amount_split))
+        try:
+            database.add_wrapup_player_split(player_name, gp_to_int(amount_split))
+        except:
+            await ctx.respond(f"Failed to convert {amount_split} to a number. Please double check your input")
         await ctx.respond(f"Successfully added {amount_split} to {player_name}!")
 
     @discord.slash_command(name="get_splits", description="Shows how much gold you have split on your account!")
