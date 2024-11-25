@@ -339,12 +339,13 @@ def parse_kill_count(data, img_file) -> dict[str, list[str]]:
 
         unparsed_time = data.get('extra').get('time')
         if unparsed_time:
-            match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)(\d+(\.\d+)?)S', unparsed_time)
+            # Match the pattern for time in ISO 8601 format (e.g., PT7M, PT1H20M, PT2H15M30S)
+            match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(\.\d+)?)S)?', unparsed_time)
             if match:
-                # Extract hours (default to 0 if not present), minutes, and seconds
+                # Extract hours, minutes, and seconds (default to 0 if not present)
                 hours = int(match.group(1) or 0)
-                minutes = int(match.group(2))
-                seconds = float(match.group(3))
+                minutes = int(match.group(2) or 0)
+                seconds = float(match.group(3) or 0)
 
                 # Round up the seconds to the nearest whole number
                 rounded_seconds = ceil(seconds)
