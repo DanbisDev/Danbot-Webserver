@@ -755,3 +755,8 @@ def handle_request():
         except Exception as e:
             print("Error parsing JSON data: " + str(e))
             print(json.dumps(json_data, indent=2))
+            return jsonify({"message": "Error parsing JSON data: " + str(e)})
+
+    if result:
+        return jsonify({"message": "Drop successfully submitted"})
+    return jsonify({"message": "No action recorded"})
