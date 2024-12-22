@@ -8,6 +8,7 @@ def player_page(player_name):
         wrapup_player = database.get_wrapup_player(player_name)
         wrapup_player = db_entities.WrapupPlayer(wrapup_player)
         wrapup_player.gold_gained = scapify.int_to_gp(wrapup_player.gold_gained)
+        wrapup_player.gold_split = scapify.int_to_gp(wrapup_player.gold_split)
     except:
         wrapup_player = db_entities.WrapupPlayer()
 
