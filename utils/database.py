@@ -67,7 +67,7 @@ def update_tile(tile_id,new_tile_id, tile_name, tile_type, old_tile_triggers, ti
     with connect() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            UPDATE tiles
+            UPDATE tiles   
             SET tile_id = %s, tile_name = %s, tile_type = %s, tile_triggers = %s, tile_trigger_weights = %s, tile_unique_drops = %s,
                 tile_triggers_required = %s, tile_repetition = %s, tile_points = %s, tile_rules = %s
             WHERE tile_id = %s
@@ -1784,3 +1784,18 @@ def get_wrapup_personal_best(boss_name):
         best_time_str, username = result
 
         return int(float(best_time_str)), username
+
+
+def get_wrapup_player(player_name):
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        SELECT * FROM wrapup_players WHERE username = %s""", (player_name,))
+
+        result = cursor.fetchone()
+
+        if result is None:
+            return None
+
+        return result

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+<title>{{ player.player_name }}</title>
+    <style>
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .left-column, .right-column {
+            width: 48%; /* Make the columns roughly half the width */
+            display: flex;
+            flex-direction: column;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-family: Arial, sans-serif; /* Use a readable font */
+            border-radius: 8px; /* Beveled edges for the table */
+            overflow: hidden; /* Ensure the border-radius affects the table */
+            margin-bottom: 20px; /* Add space between tables */
+            border: 1px solid #ddd; /* Apply border around the table */
+        }
+
+        th {
+            background-color: #333; /* Darker background for navbar */
+            color: white;
+            font-size: 16px; /* Larger font size for header */
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+        }
+
+        /* Ensure border-radius is applied on table corners */
+        th:first-child {
+            border-top-left-radius: 8px;
+        }
+        th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        /* Apply bottom-left and bottom-right radius to the last row */
+        tr:last-child td:first-child {
+            border-bottom-left-radius: 8px;
+        }
+        tr:last-child td:last-child {
+            border-bottom-right-radius: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #1E1E1E;
+        }
+
+        tr:hover {
+            background-color: #444; /* Slightly darker hover effect */
+        }
+
+        tr {
+            margin-bottom: 5px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+        }
+
+        .search-bar input[type="text"] {
+            border: none;
+            padding: 10px;
+            color: #000;
+            background-color: #fff;
+        }
+
+        .search-bar input[type="submit"] {
+            border: none;
+            padding: 10px;
+            color: #fff;
+            background-color: #444;
+            cursor: pointer;
+        }
+
+        a {
+            color: white;
+        }
+
+        /* Ensure buttons are displayed inline */
+        .action-buttons {
+            display: flex;
+            gap: 10px; /* Add space between buttons */
+        }
+
+        .action-buttons form {
+            display: inline;
+        }
+
+        .action-buttons button {
+            padding: 5px 10px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Hover state for edit button */
+        .action-buttons button:hover {
+            background-color: limegreen;
+        }
+
+        /* Hover state for delete button */
+        .delete-button:hover {
+            background-color: red !important;
+        }
+    </style>
+
+    <script>
+        function submitForm(event) {
+            event.preventDefault();
+            var player = document.getElementById('searchbox').value;
+            window.location.href = '/wrapup/player/' + player;
+        }
+    </script>
+        <form onsubmit="submitForm(event)" class="search-bar">
+            <datalist id="player-names">
+                {% for playername in playernames %}
+                <option value="{{playername}}">
+                {% endfor %}
+            </datalist>
+            <input type="text" id="searchbox" name="searchboxcontent" placeholder="Search..." list="player-names" autocomplete="off">
+            <input type="submit" value="Search">
+        </form>
+    <div class="header" style="justify-content: center;">
+        <h1>{{player.player_name}}</h1>
+    </div>
+</head>
+{% endblock %}

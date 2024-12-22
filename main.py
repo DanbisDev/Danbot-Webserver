@@ -15,6 +15,7 @@ from routes.board_routes import board_routes
 import os
 import threading
 import bot
+from routes.wrapup_routes import wrapup_routes
 
 from utils.database import add_user, get_user_by_email, check_password, get_user_by_id, \
     database_startup  # Import your database functions
@@ -94,6 +95,7 @@ app.register_blueprint(tile_routes, url_prefix="/tile")
 app.register_blueprint(team_routes, url_prefix="/team")
 app.register_blueprint(player_routes, url_prefix="/player")
 app.register_blueprint(relevant_drop_routes, url_prefix="/relevant_drop")
+app.register_blueprint(wrapup_routes, url_prefix="/wrapup")
 
 def start_bot():
     bot.run()

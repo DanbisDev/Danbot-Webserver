@@ -94,3 +94,31 @@ class RelevantDrop:
         self.drop_name = relevant_drop_tuple[4]
         self.player_name = relevant_drop_tuple[5]
         self.relevant_drops_pk = relevant_drop_tuple[6]
+
+
+class WrapupPlayer:
+    def __init__(self, wrapup_player_tuple=None):
+        # Default values for each field in case the tuple is None
+        self.player_id = None
+        self.player_deaths = 0
+        self.gold_gained = 0
+        self.pets_gained = 0
+        self.personal_collection_logs = 0
+        self.personal_pbs = 0
+        self.username = ""
+        self.gold_split = 0
+        self.levels_gained = 0
+        self.slayer_tasks = 0
+        self.clues_completed = 0
+        self.quests_completed = 0
+        self.max_levels_gained = 0
+        self.combat_achievements = 0
+        self.dink_account_hash = ""
+
+        # If the tuple is provided, assign values to the attributes
+        if wrapup_player_tuple:
+            (self.player_id, self.player_deaths, self.gold_gained, self.pets_gained,
+             self.personal_collection_logs, self.personal_pbs, self.username, self.gold_split,
+             self.levels_gained, self.slayer_tasks, self.clues_completed, self.quests_completed,
+             self.max_levels_gained, self.combat_achievements, self.dink_account_hash) = wrapup_player_tuple
+
