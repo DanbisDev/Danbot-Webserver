@@ -134,7 +134,7 @@
         }
     </script>
 
-    <div class="header" style="justify-content: center;">
+    <div class="header">
         <form onsubmit="submitForm(event)" class="search-bar">
             <datalist id="player-names">
                 {% for playername in playernames %}
@@ -144,6 +144,8 @@
             <input type="text" id="searchbox" name="searchboxcontent" placeholder="Search..." list="player-names" autocomplete="off">
             <input type="submit" value="Search">
         </form>
+    </div>
+    <div class="header" style="justify-content: center;">
         <h1>{{wrapup_player.username}}</h1>
     </div>
     <table>
@@ -154,10 +156,34 @@
             <th>Personal Collection Logs</th>
         </tr>
         <tr>
-            <td>{{ wrapup_player.player_deaths }}</td>
+            <td>{{ wrapup_player.player_deaths }} deaths</td>
             <td>{{ wrapup_player.gold_gained }}</td>
-            <td>{{ wrapup_player.pets_gained }}</td>
-            <td>{{ wrapup_player.personal_collection_logs }}</td>
+            <td>{{ wrapup_player.pets_gained }} pets</td>
+            <td>{{ wrapup_player.personal_collection_logs }} clogs</td>
+        </tr>
+        <tr>
+            <th>Deaths</th>
+            <th>Gold Gained</th>
+            <th>Pets Gained</th>
+            <th>Personal Collection Logs</th>
+        </tr>
+        <tr>
+            <td>{{ wrapup_player.player_deaths }} deaths</td>
+            <td>{{ wrapup_player.gold_gained }}</td>
+            <td>{{ wrapup_player.pets_gained }} pets</td>
+            <td>{{ wrapup_player.personal_collection_logs }} clogs</td>
+        </tr>
+        <tr>
+            <th>Deaths</th>
+            <th>Gold Gained</th>
+            <th>Pets Gained</th>
+            <th>Personal Collection Logs</th>
+        </tr>
+        <tr>
+            <td>{{ wrapup_player.player_deaths }} deaths</td>
+            <td>{{ wrapup_player.gold_gained }}</td>
+            <td>{{ wrapup_player.pets_gained }} pets</td>
+            <td>{{ wrapup_player.personal_collection_logs }} clogs</td>
         </tr>
     </table>
 </head>
