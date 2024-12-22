@@ -133,6 +133,8 @@
             window.location.href = '/wrapup/player/' + player;
         }
     </script>
+
+    <div class="header" style="justify-content: center;">
         <form onsubmit="submitForm(event)" class="search-bar">
             <datalist id="player-names">
                 {% for playername in playernames %}
@@ -142,8 +144,21 @@
             <input type="text" id="searchbox" name="searchboxcontent" placeholder="Search..." list="player-names" autocomplete="off">
             <input type="submit" value="Search">
         </form>
-    <div class="header" style="justify-content: center;">
         <h1>{{wrapup_player.username}}</h1>
     </div>
+    <table>
+        <tr>
+            <th>Deaths</th>
+            <th>Gold Gained</th>
+            <th>Pets Gained</th>
+            <th>Personal Collection Logs</th>
+        </tr>
+        <tr>
+            <td>wrapup_player.player_deaths</td>
+            <td>wrapup_player.gold_gained</td>
+            <td>wrapup_player.pets_gained</td>
+            <td>wrapup_player.personal_collection_logs</td>
+        </tr>
+    </table>
 </head>
 {% endblock %}
