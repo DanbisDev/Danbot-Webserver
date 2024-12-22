@@ -12,4 +12,4 @@ def player_page(player_name):
     except:
         wrapup_player = db_entities.WrapupPlayer()
 
-    return render_template('wrapup_templates/player.html', wrapup_player=wrapup_player, playernames=autocomplete.player_names())
+    return render_template('wrapup_templates/player.html', wrapup_player=wrapup_player, playernames=autocomplete.wrapup_player_names())

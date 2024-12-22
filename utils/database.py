@@ -1785,6 +1785,12 @@ def get_wrapup_personal_best(boss_name):
 
         return int(float(best_time_str)), username
 
+def get_wrapup_player_names():
+    with connect() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        SELECT username FROM wrapup_players""")
 
 def get_wrapup_player(player_name):
     with connect() as conn:
@@ -1793,7 +1799,7 @@ def get_wrapup_player(player_name):
         cursor.execute("""
         SELECT * FROM wrapup_players WHERE username = %s""", (player_name,))
 
-        result = cursor.fetchone()
+        result = cursor.fetchall()
 
         if result is None:
             return None

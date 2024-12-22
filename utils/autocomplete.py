@@ -31,6 +31,10 @@ def team_names():
         team_names.append(team.team_name)
     return team_names
 
+def wrapup_player_names():
+    player_names = database.get_player_names()
+    return player_names
+
 def player_names():
     player_names = []
     for player in database.get_players():
