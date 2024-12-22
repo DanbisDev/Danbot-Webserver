@@ -124,6 +124,15 @@
         .delete-button:hover {
             background-color: red !important;
         }
+
+        .search-bar {
+            display: flex;
+            align-items: center; /* Aligns the input fields vertically */
+        }
+
+        #searchbox {
+            margin-right: 10px; /* Optional, adds space between the input and the button */
+        }
     </style>
 
     <script>
@@ -168,10 +177,10 @@
             <th>Max Levels Gained</th>
         </tr>
         <tr>
-            <td>{{ wrapup_player.personal_pbs }} deaths</td>
+            <td>{{ wrapup_player.personal_pbs }} pbs</td>
             <td>{{ wrapup_player.gold_split }}</td>
-            <td>{{ wrapup_player.levels_gained }} pets</td>
-            <td>{{ wrapup_player.max_levels_gained }} clogs</td>
+            <td>{{ wrapup_player.levels_gained }} levels</td>
+            <td>{{ wrapup_player.max_levels_gained }} 99's</td>
         </tr>
         <tr>
             <th>Slayer Tasks</th>
@@ -180,10 +189,10 @@
             <th>Combat Achievements</th>
         </tr>
         <tr>
-            <td>{{ wrapup_player.slayer_tasks }} deaths</td>
-            <td>{{ wrapup_player.clues_completed }}</td>
-            <td>{{ wrapup_player.quests_completed }} pets</td>
-            <td>{{ wrapup_player.combat_achievements }} clogs</td>
+            <td>{{ wrapup_player.slayer_tasks }} tasks</td>
+            <td>{{ wrapup_player.clues_completed }} clues</td>
+            <td>{{ wrapup_player.quests_completed }} quests</td>
+            <td>{{ wrapup_player.combat_achievements }} ca's</td>
         </tr>
     </table>
 </head>
