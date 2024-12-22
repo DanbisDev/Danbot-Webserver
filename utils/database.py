@@ -1792,6 +1792,8 @@ def get_wrapup_player_names():
         cursor.execute("""
         SELECT username FROM wrapup_players""")
 
+        return cursor.fetchall()
+
 def get_wrapup_player(player_name):
     with connect() as conn:
         cursor = conn.cursor()
@@ -1799,7 +1801,7 @@ def get_wrapup_player(player_name):
         cursor.execute("""
         SELECT * FROM wrapup_players WHERE username = %s""", (player_name,))
 
-        result = cursor.fetchall()
+        result = cursor.fetchone()
 
         if result is None:
             return None
