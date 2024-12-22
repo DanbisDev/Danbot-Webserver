@@ -15,6 +15,6 @@ If you have any questions or need further information, please feel free to reach
 - Email: deckergame.danny@gmail.com
 - Discord: danny0897
 
-# Special Thanks
+## Warning
 
-A big thank you to **Taercy** and **Max uwu** for their contributions to this project and thank you to the Dink developers for making this project inifinitely easier
+About 60% of this code is gpt generated now because I got lazy. If you fork or clone gl
