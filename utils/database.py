@@ -1250,42 +1250,59 @@ def database_startup():
 
 
 def reset_bingo_tables():
-    # Drop all tables
-    print("connecting to db")
+    print("Connecting to db")
     conn = connect()
-    print("connected")
+    print("Connected")
     cursor = conn.cursor()
 
-    # Drop each table
-    cursor.execute(f"DROP TABLE IF EXISTS chats CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS completed_tiles CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS drop_whitelist CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS drops CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS killcount CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS manual_tile_progress CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS partial_completion CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS players CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS relevant_drops CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS requests CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS teams CASCADE;")
-    cursor.execute(f"DROP TABLE IF EXISTS tiles CASCADE;")
+    try:
+        # Drop all tables in reverse order to avoid foreign key issues
+        print("Dropping existing tables...")
 
+        cursor.execute(f"DROP TABLE IF EXISTS relevant_drops CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS partial_completions CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS chats CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS requests CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS manual_tile_progress CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS completed_tiles CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS drop_whitelist CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS drops CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS killcount CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS tiles CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS players CASCADE;")
+        cursor.execute(f"DROP TABLE IF EXISTS teams CASCADE;")
 
-    print("All tables dropped successfully.")
-    print("Recreating now...")
+        print("All tables dropped successfully.")
+        print("Recreating tables...")
 
-    # Create the 'drops' table
-
-    cursor.execute('''
+        # Create the 'teams' table first (no dependencies)
+        cursor.execute('''
             CREATE TABLE teams (
                 team_name text,
                 team_points real,
                 team_webhook text,
                 team_id SERIAL PRIMARY KEY
             )
-            ''')
+        ''')
 
-    cursor.execute('''
+        # Create the 'tiles' table (does not depend on other tables)
+        cursor.execute('''
+            CREATE TABLE tiles (
+                tile_id SERIAL PRIMARY KEY,
+                tile_name text,
+                tile_type text,
+                tile_triggers text,
+                tile_trigger_weights text,
+                tile_unique_drops boolean,
+                tile_triggers_required int,
+                tile_repetition int,
+                tile_points real,
+                tile_rules text
+            )
+        ''')
+
+        # Create the 'players' table (depends on 'teams')
+        cursor.execute('''
             CREATE TABLE players (
                 player_id SERIAL PRIMARY KEY,
                 player_name text,
@@ -1296,9 +1313,10 @@ def reset_bingo_tables():
                 pet_count integer,
                 FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
-            ''')
+        ''')
 
-    cursor.execute('''
+        # Create the 'drops' table (depends on 'players' and 'teams')
+        cursor.execute('''
             CREATE TABLE drops (
                 team_id integer,
                 player_id integer,
@@ -1313,7 +1331,8 @@ def reset_bingo_tables():
             )
         ''')
 
-    cursor.execute('''
+        # Create the 'killcount' table (depends on 'players' and 'teams')
+        cursor.execute('''
             CREATE TABLE killcount (
                 player_id integer,
                 team_id integer,
@@ -1321,66 +1340,58 @@ def reset_bingo_tables():
                 kills integer,
                 killcount_pk SERIAL PRIMARY KEY,
                 FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE,
-                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
-            )''')
-
-    cursor.execute('''
-            CREATE TABLE tiles (
-                tile_id SERIAL PRIMARY KEY,
-                tile_name text,
-                tile_type text,
-                tile_triggers text,
-                tile_trigger_weights text,
-                tile_unique_drops boolean,
-                tile_triggers_required int,
-                tile_repetition int,
-                tile_points real,
-                tile_rules text
+                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
-            ''')
+        ''')
 
-    cursor.execute('''
+        # Create the 'drop_whitelist' table (depends on 'tiles')
+        cursor.execute('''
             CREATE TABLE drop_whitelist (
                 drop_name text PRIMARY KEY,
                 tile_id int,
-                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE
-            )''')
+                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE
+            )
+        ''')
 
-    cursor.execute('''
+        # Create the 'completed_tiles' table (depends on 'teams' and 'tiles')
+        cursor.execute('''
             CREATE TABLE completed_tiles (
                 team_id integer,
                 tile_id integer,
                 completed_tile_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
-                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
+                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
-            ''')
+        ''')
 
-    cursor.execute('''
+        # Create the 'manual_tile_progress' table (depends on 'players', 'teams', and 'tiles')
+        cursor.execute('''
             CREATE TABLE manual_tile_progress (
                 player_id integer,
                 team_id integer,
                 tile_id integer,
                 progress real,
                 manual_tile_progress_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY (team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
-                FOREIGN KEY (tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
-                FOREIGN KEY (player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE
+                FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
-            ''')
+        ''')
 
-    cursor.execute('''
+        # Create the 'requests' table (does not depend on other tables)
+        cursor.execute('''
             CREATE TABLE requests (
                 request_id SERIAL PRIMARY KEY,
                 team_name text,
                 player_name text,
-                tile_name text, 
+                tile_name text,
                 item_name text,
                 evidence text
             )
-            ''')
+        ''')
 
-    cursor.execute('''
+        # Create the 'chats' table (depends on 'players', 'teams', and 'tiles')
+        cursor.execute('''
             CREATE TABLE chats (
                 player_id integer,
                 team_id integer,
@@ -1389,11 +1400,12 @@ def reset_bingo_tables():
                 chats_pk SERIAL PRIMARY KEY,
                 FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE,
-                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE                
+                FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
-            ''')
+        ''')
 
-    cursor.execute('''
+        # Create the 'partial_completions' table (depends on 'players', 'teams', and 'tiles')
+        cursor.execute('''
             CREATE TABLE partial_completions (
                 team_id integer,
                 tile_id integer,
@@ -1404,9 +1416,10 @@ def reset_bingo_tables():
                 FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
-            ''')
+        ''')
 
-    cursor.execute('''
+        # Create the 'relevant_drops' table (depends on 'drops', 'players', 'teams', and 'tiles')
+        cursor.execute('''
             CREATE TABLE relevant_drops (
                 team_id integer,
                 player_id integer,
@@ -1416,21 +1429,26 @@ def reset_bingo_tables():
                 player_name text,
                 drops_pk SERIAL,
                 relevant_drops_pk SERIAL PRIMARY KEY,
-                FOREIGN KEY(drops_pk) REFERENCES  drops(drops_pk) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY(drops_pk) REFERENCES drops(drops_pk) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY(team_id) REFERENCES teams(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY(tile_id) REFERENCES tiles(tile_id) ON DELETE CASCADE ON UPDATE CASCADE,
                 FOREIGN KEY(player_id) REFERENCES players(player_id) ON DELETE CASCADE ON UPDATE CASCADE
             )
-            ''')
+        ''')
+
+        # Commit the transaction
+        conn.commit()
+        print("Finished creating tables successfully!")
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        conn.rollback()  # Rollback in case of error
+
+    finally:
+        # Close the connection
+        conn.close()
 
 
-
-    # Save (commit) the changes
-    conn.commit()
-    print("Finished creating!")
-
-    # Close the connection
-    conn.close()
 
 
 def read_tiles(file_name):
